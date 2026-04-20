@@ -1,26 +1,16 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme {
+  --font-poppins: Poppins, sans-serif;
+  --color-shop_light_brown: #66030e;
+  --color-shop_dark_green: #063c28;
+  --color-shop_light_bg: #f6f6f6;
+  --color-shop_orange: #fb6c08;
+  --color-shop_darkColor: #151515;
+  --color-shop_light_blue: #26619c;
+  --color_lightColor: #52525b;
+  --color_lightOrange: #fe5a1d;
+  --color-deal-bg: #f1f3f8;
 }
