@@ -1,0 +1,15 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "deal": "Deals",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "header": {
+    "delivery": "Fast delivery across Senegal",
+    "categories": "All categories",
+    "search": "Search a product..."
+  }
+}

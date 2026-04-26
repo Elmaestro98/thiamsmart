@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "shop": "Shop",
+    "deal": "Bon Plans",
+    "blog": "Blog",
+    "contact": "Contact"
+  },
+  "header": {
+    "delivery": "Livraison rapide partout au Sénégal",
+    "categories": "Toutes les catégories",
+    "search": "Rechercher un produit..."
+  }
+}
