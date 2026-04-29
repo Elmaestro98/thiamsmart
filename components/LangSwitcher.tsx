@@ -1,16 +1,20 @@
 "use client";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "../navigation"; // ← le vôtre
 
 function LangSwitcher() {
-  const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
 
   const switchLang = () => {
     const newLocale = locale === "fr" ? "en" : "fr";
-    router.replace(pathname, { locale: newLocale });
+
+    // Encode le pathname pour éviter les erreurs avec les paramètres d'URL
+    const encodedRedirect = encodeURIComponent(pathname);
+
+    // Appelle l'API qui pose le cookie puis redirige vers la page d'origine
+    window.location.href = `/api/set-locale?locale=${newLocale}&redirect=${encodedRedirect}`;
   };
 
   return (
