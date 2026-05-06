@@ -5,7 +5,7 @@ import createMiddleware from "next-intl/middleware";
 const intlMiddleware = createMiddleware({
   locales: ["fr", "en"],
   defaultLocale: "fr",
-  localePrefix: 'never'
+  localePrefix: "never",
 });
 
 export default clerkMiddleware((auth, req) => {
@@ -14,7 +14,7 @@ export default clerkMiddleware((auth, req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|studio|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
   ],
 };

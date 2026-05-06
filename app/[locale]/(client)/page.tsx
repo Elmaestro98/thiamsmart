@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import HommeBanner from "@/components/HommeBanner";
 import Container from "@/components/Container";
+import CategoryGrid from "@/components/CategoryGrid";
 
 export const metadata: Metadata = {
   title: "Accueil",

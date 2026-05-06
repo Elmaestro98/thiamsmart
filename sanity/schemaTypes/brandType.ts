@@ -1,23 +1,21 @@
-import { defineField, defineType } from "sanity";
 import { TagIcon } from "@sanity/icons";
+import { defineField, defineType } from "sanity";
 
-export const categoryType = defineType({
-  name: "category",
-  title: "categories",
+export const brandType = defineType({
+  name: "brand",
+  title: "Marques",
   type: "document",
   icon: TagIcon,
   fields: [
     defineField({
-      name: "titre",
+      name: "title",
       type: "string",
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "slug",
       type: "slug",
       options: {
-        source: "titre", // ✅ corrigé
-        maxLength: 96,
+        source: "title",
       },
       validation: (Rule) => Rule.required(),
     }),
@@ -26,13 +24,8 @@ export const categoryType = defineType({
       type: "text",
     }),
     defineField({
-      name: "range",
-      type: "number",
-      description: "Starting From",
-    }),
-    defineField({
       name: "image",
-      title: "Categorie Image",
+      title: "Brand Image",
       type: "image",
       options: {
         hotspot: true,
@@ -41,7 +34,7 @@ export const categoryType = defineType({
   ],
   preview: {
     select: {
-      title: "titre", // ✅ corrigé
+      title: "title",
       subtitle: "description",
       media: "image",
     },
