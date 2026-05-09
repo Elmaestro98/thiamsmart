@@ -38,36 +38,36 @@ const bannerSlides: BannerSlide[] = [
   },
   {
     src: P2,
-    alt: "Ordinateur portable dernière génération",
+    alt: "Fer à repasser",
     title: "Nouveautés",
-    description: "Des PC de dernière génération",
+    description: "Consommation en éléctricité faible",
     href: "/shop?category=ordinateurs",
     gradientDir: "bottom",
     ctaLabel: "Explorer",
   },
   {
     src: P3,
-    alt: "Smartphone toutes marques",
-    title: "Smartphones",
-    description: "Toute marque chez LBC",
+    alt: "Refrigérateur",
+    title: "Refrigérateur",
+    description: "Refrigérateur de derniére génération",
     href: "/shop?category=smartphones",
     gradientDir: "right",
     ctaLabel: "Voir les modèles",
   },
   {
     src: P4,
-    alt: "Casque audio authentique",
-    title: "Casques",
-    description: "Des casques authentiques",
+    alt: "Ecran plat ",
+    title: "Ecran Plat Oled",
+    description: "Ecran Plat connécté",
     href: "/shop?category=casques",
     gradientDir: "bottom",
     ctaLabel: "Écouter",
   },
   {
     src: P5,
-    alt: "Casque audio authentique",
-    title: "Casques",
-    description: "Des casques authentiques",
+    alt: "Ventilateur",
+    title: "Ventilateur",
+    description: "Ventilateur",
     href: "/shop?category=casques",
     gradientDir: "bottom",
     ctaLabel: "Écouter",
@@ -203,9 +203,9 @@ function HomeBanner() {
 
                         <button
                           aria-label={`${slide.ctaLabel ?? "Acheter"} — ${slide.title}`}
-                          className={`bg-shop_orange text-white px-6 md:px-8 py-2.5 md:py-3
+                          className={`bg-shop_light_brown text-white px-6 md:px-8 py-2.5 md:py-3
                             rounded-full font-medium text-sm md:text-base
-                            hover:bg-orange-500 transition-all duration-300
+                            hover:bg-shop_light_brown/60 transition-all duration-300
                             transform hover:scale-105 shadow-lg hover:shadow-xl
                             transition-all duration-500 delay-200
                             ${isActive && isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}

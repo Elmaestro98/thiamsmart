@@ -65,6 +65,16 @@ const BLOG_CATEGORIES = defineQuery(
   }`,
 );
 
+//Top produit
+
+const TOP_PRODUCTS_QUERY = `*[_type == "product"][0...5]{
+  _id,
+  name,
+  "image": images[0],
+  "imageUrl": images[0].asset->url,
+  "imageDimensions": images[0].asset->metadata.dimensions
+}`;
+
 const OTHERS_BLOG_QUERY = defineQuery(`*[
   _type == "blog"
   && defined(slug.current)
@@ -140,4 +150,5 @@ export {
   CATEGORIES_QUERY,
   PRODUCTS_BY_CATEGORY_QUERY,
   PRODUCT_FULL_QUERY,
+  TOP_PRODUCTS_QUERY,
 };

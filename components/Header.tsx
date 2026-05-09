@@ -94,9 +94,9 @@ const Header = () => {
       </div>
 
       {/* ─── Recherche mobile ─── */}
-      <div className="md:hidden px-4 pb-3">
+      <Container className="md:hidden px-4 pb-3">
         <SearchBar />
-      </div>
+      </Container>
 
       {/* ─── Catégories + Navigation — desktop ─── */}
       <nav

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import HommeBanner from "@/components/HommeBanner";
 import Container from "@/components/Container";
-import CategoryGrid from "@/components/CategoryGrid";
+import Topproduct from "@/components/Topproduct";
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -13,6 +13,7 @@ const Home = async () => {
   return (
     <Container>
       <HommeBanner />
+      <Topproduct />
     </Container>
   );
 };
