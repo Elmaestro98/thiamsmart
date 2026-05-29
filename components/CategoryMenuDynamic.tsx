@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { client } from "@/sanity/lib/client";
-import { CATEGORIES_QUERY } from "@/sanity/queries/query";
 import { urlFor } from "@/sanity/lib/image";
 import {
   Menu,
@@ -14,6 +12,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import { LayoutGrid, ChevronDown } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface Category {
   _id: string;
@@ -29,18 +28,22 @@ export default function CategoryMenu() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const data = await client.fetch(CATEGORIES_QUERY);
-        // Inclure l'image avec les autres champs
-        setCategories(
-          data.map((cat: any) => ({
-            _id: cat._id,
-            titre: cat.titre,
-            slug: cat.slug,
-            image: cat.image,
-          })),
-        );
+        const response = await fetch("/api/categories", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+
+        console.log("Catégories reçues de l'API:", data);
+        setCategories(data);
       } catch (error) {
         console.error("Erreur lors du chargement des catégories:", error);
+        toast.error("Impossible de charger les catégories");
       } finally {
         setLoading(false);
       }

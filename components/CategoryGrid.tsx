@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { client } from "@/sanity/lib/client";
-import {
-  CATEGORIES_QUERY,
-  PRODUCTS_BY_CATEGORY_QUERY,
-} from "@/sanity/queries/query";
 import ProductsGrid from "./ProductsGrid";
 import { urlFor } from "@/sanity/lib/image";
 
@@ -33,7 +28,12 @@ export default function CategoryGrid() {
     const loadCategories = async () => {
       try {
         setLoading(true);
-        const data = await client.fetch(CATEGORIES_QUERY);
+        const response = await fetch("/api/categories");
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
         console.log("Catégories chargées:", data);
         setCategories(data);
       } catch (error) {
@@ -52,11 +52,16 @@ export default function CategoryGrid() {
       setLoading(true);
       setSelectedCategory(category);
 
-      // Récupérer les produits de cette catégorie
-      const productsData = await client.fetch(PRODUCTS_BY_CATEGORY_QUERY, {
-        categoryId: category._id,
-      });
+      const response = await fetch(
+        `/api/products-by-category?categoryId=${encodeURIComponent(
+          category._id,
+        )}`,
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
+      const productsData = await response.json();
       console.log(`Produits de ${category.titre}:`, productsData);
       setProducts(productsData);
     } catch (error) {

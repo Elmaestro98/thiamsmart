@@ -5,16 +5,21 @@ import { Heart } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { cn } from "@/lib/utils";
 
 interface FavoriteButtonProps {
   showProduct?: boolean;
   product?: Product | null;
+  className?: string;
 }
 
 const FavoriteButton = ({
   showProduct = false,
   product,
-}: FavoriteButtonProps) => {
+  className,
+  ...props
+}: FavoriteButtonProps &
+  React.HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>) => {
   const { favoriteProduct, addToFavorite } = useStore();
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +39,10 @@ const FavoriteButton = ({
   const handleFavorite = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (typeof props.onClick === "function") {
+      (props.onClick as React.MouseEventHandler<HTMLButtonElement>)(e);
+    }
 
     if (!product?._id || isLoading) return;
 
@@ -59,10 +68,14 @@ const FavoriteButton = ({
     return (
       <Link
         href="/wishlist"
-        className="relative flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+        className={cn(
+          "relative flex items-center justify-center p-2 rounded-full hover:bg-shop_light_brown/20 transition-colors duration-200",
+          className,
+        )}
         aria-label={`Voir les favoris (${favoriteProduct?.length || 0} articles)`}
+        {...(props as any)}
       >
-        <Heart className="w-6 h-6 text-black" />
+        <Heart className="w-6 h-6 text-white" />
         {favoriteProduct?.length > 0 && (
           <span className="absolute -top-1 -right-1 bg-shop_ligh_blue text-shop_orange text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
             {favoriteProduct.length}
@@ -75,9 +88,13 @@ const FavoriteButton = ({
   // Mode bouton produit
   return (
     <button
+      {...(props as any)}
       onClick={handleFavorite}
       disabled={isLoading || !product?._id}
-      className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+      className={cn(
+        "p-2 rounded-full hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group",
+        className,
+      )}
       aria-label={
         existingProduct ? "Retirer des favoris" : "Ajouter aux favoris"
       }

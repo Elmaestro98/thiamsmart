@@ -34,18 +34,6 @@ const Header = () => {
             className="flex items-center gap-4 text-white/60 text-xs"
           >
             <LangSwitcher />
-
-            <Link href="/faq" className="hover:text-white hoverEffect">
-              FAQ
-            </Link>
-            <span aria-hidden="true">|</span>
-            <Link href="/contact" className="hover:text-white hoverEffect">
-              Contact
-            </Link>
-            <span aria-hidden="true">|</span>
-            <Link href="/about" className="hover:text-white hoverEffect">
-              À propos
-            </Link>
           </nav>
         </Container>
       </div>

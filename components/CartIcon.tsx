@@ -14,7 +14,7 @@ const CartIcon = () => {
       aria-label={`Panier - ${itemCount} article${itemCount > 1 ? "s" : ""}`}
     >
       <ShoppingBag
-        className="w-5 h-5 transition-colors duration-200 group-hover:text-shop_light_green"
+        className="w-5 h-5 text-white transition-colors duration-200 group-hover:text-shop_light_green"
         aria-hidden="true"
       />
       {itemCount > 0 && (

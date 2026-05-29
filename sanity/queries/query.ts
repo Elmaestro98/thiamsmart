@@ -14,11 +14,49 @@ const LATEST_BLOG_QUERY = defineQuery(
     }`,
 );
 
-const DEAL_PRODUCTS = defineQuery(
-  `*[_type == 'product' && status == 'promotion'] | order(name asc){
-    ...,"categories": categories[]->title
-  }`,
-);
+const DEAL_PRODUCTS = defineQuery(`
+  *[_type == 'product' && status == 'promotion']
+  | order(name asc) {
+
+    _id,
+    _createdAt,
+
+    name,
+
+    "slug": slug.current,
+
+    description,
+
+    price,
+    discount,
+    stock,
+    status,
+    variant,
+    isFeatured,
+
+    // Images
+    images[]{
+      asset->{
+        _id,
+        url
+      }
+    },
+
+    // Categories
+    categories[]->{
+      _id,
+      titre,
+      "slug": slug.current
+    },
+
+    // Brand
+    brand->{
+      _id,
+      title,
+      "slug": slug.current
+    }
+  }
+`);
 
 const PRODUCT_BY_SLUG_QUERY = defineQuery(
   `*[_type == "product" && slug.current == $slug] | order(name asc) [0]`,

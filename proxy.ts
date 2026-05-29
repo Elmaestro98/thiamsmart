@@ -1,6 +1,7 @@
 // proxy.ts
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
+import { NextResponse } from "next/server";
 
 const intlMiddleware = createMiddleware({
   locales: ["fr", "en"],
@@ -9,6 +10,12 @@ const intlMiddleware = createMiddleware({
 });
 
 export default clerkMiddleware((auth, req) => {
+  const pathname = req.nextUrl.pathname;
+
+  if (pathname.startsWith("/api/") || pathname.startsWith("/trpc/")) {
+    return NextResponse.next();
+  }
+
   return intlMiddleware(req);
 });
 
