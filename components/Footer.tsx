@@ -55,7 +55,7 @@ function Footer() {
 
   return (
     <footer
-      className="bg-gradient-to-br from-shop_light_brown/40 via-amber-50 to-amber-100 border-t"
+      className="bg-[#DBC8C8] via-amber-50 to-amber-100 border-t"
       role="contentinfo"
     >
       <Container>

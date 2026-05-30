@@ -1,7 +1,14 @@
 "use client";
 
 import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
-import { TableBody, TableCell, TableRow } from "./ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 import {
   Tooltip,
   TooltipContent,
@@ -52,9 +59,42 @@ const OrdersComponent = ({ orders, onDeleteOrder }: OrdersComponentProps) => {
   };
 
   return (
-    <>
-      <TableBody>
-        <TooltipProvider>
+    <TooltipProvider>
+      <Table>
+        <TableHeader>
+          <TableRow
+            className="hover:opacity-100 border-b-0"
+            style={{
+              background: "linear-gradient(90deg, #fb6c08 0%, #26619c 100%)",
+            }}
+          >
+            <TableHead className="text-[11px] font-bold text-white/90 uppercase tracking-widest w-[130px] md:w-auto pl-6 py-3.5">
+              N° Commande
+            </TableHead>
+            <TableHead className="hidden md:table-cell text-[11px] font-bold text-white/90 uppercase tracking-widest py-3.5">
+              Date
+            </TableHead>
+            <TableHead className="text-[11px] font-bold text-white/90 uppercase tracking-widest py-3.5">
+              Client
+            </TableHead>
+            <TableHead className="hidden sm:table-cell text-[11px] font-bold text-white/90 uppercase tracking-widest py-3.5">
+              Email
+            </TableHead>
+            <TableHead className="text-[11px] font-bold text-white/90 uppercase tracking-widest py-3.5">
+              Total
+            </TableHead>
+            <TableHead className="text-[11px] font-bold text-white/90 uppercase tracking-widest py-3.5">
+              Statut
+            </TableHead>
+            <TableHead className="hidden sm:table-cell text-[11px] font-bold text-white/90 uppercase tracking-widest py-3.5">
+              Facture
+            </TableHead>
+            <TableHead className="text-[11px] font-bold text-white/90 uppercase tracking-widest text-center py-3.5 pr-6">
+              Action
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {orders.map((order) => {
             const statusStyle =
               STATUS_STYLES[order.status ?? ""] ??
@@ -144,15 +184,15 @@ const OrdersComponent = ({ orders, onDeleteOrder }: OrdersComponentProps) => {
               </Tooltip>
             );
           })}
-        </TooltipProvider>
-      </TableBody>
+        </TableBody>
+      </Table>
 
       <OrderDetailDialog
         order={selectedOrder}
         isOpen={!!selectedOrder}
         onClose={() => setSelectedOrder(null)}
       />
-    </>
+    </TooltipProvider>
   );
 };
 

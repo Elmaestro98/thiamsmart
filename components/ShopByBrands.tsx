@@ -5,7 +5,7 @@ import { getAllBrands } from "@/sanity/queries";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import { Brand } from "@/sanity.types";
-import { GitCompareArrows, Headset, ShieldCheck, Truck } from "lucide-react";
+import { DoorOpen, Headset, ShieldCheck, Truck } from "lucide-react";
 
 const extraData = [
   {
@@ -23,6 +23,12 @@ const extraData = [
     title: "Matériels Garantis",
     description: "Qualité vérifiée par notre équipe experte",
     icon: ShieldCheck,
+  },
+
+  {
+    title: "Ouverture 7/7",
+    description: "Thiamsmart est disponible 24h/24h 7/7",
+    icon: DoorOpen,
   },
 ];
 
@@ -88,10 +94,10 @@ const ShopByBrands = async () => {
               key={index}
               className="group flex items-center gap-4 px-6 py-5 hover:bg-shop_orange/[0.03] transition-colors duration-200"
             >
-              <div className="shrink-0 w-11 h-11 rounded-xl bg-shop_light_blue/10 flex items-center justify-center group-hover:bg-shop_light_blue/15 transition-colors duration-200">
+              <div className="shrink-0 w-11 h-11 rounded-xl bg-[#74212a] flex items-center justify-center  transition-colors duration-200">
                 <Icon
                   size={22}
-                  className="text-shop_light_blue"
+                  className="text-shop_light_bg"
                   strokeWidth={1.75}
                 />
               </div>

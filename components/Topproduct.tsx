@@ -1,5 +1,6 @@
 import Container from "./Container";
 import Image from "next/image";
+import Title from "./Title";
 import client from "@/sanity/lib/client";
 import { TOP_PRODUCTS_QUERY } from "@/sanity/queries/query";
 

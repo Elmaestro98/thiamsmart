@@ -66,7 +66,7 @@ export default function Map({ boutiques = BOUTIQUES }: MapProps) {
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
 
       {boutiques.map((boutique) => (
