@@ -21,20 +21,11 @@ const FavoriteButton = ({
 }: FavoriteButtonProps &
   React.HTMLAttributes<HTMLButtonElement | HTMLAnchorElement>) => {
   const { favoriteProduct, addToFavorite } = useStore();
-  const [existingProduct, setExistingProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (!product?._id) {
-      setExistingProduct(null);
-      return;
-    }
-
-    const availableItem = favoriteProduct.find(
-      (item) => item?._id === product._id,
-    );
-    setExistingProduct(availableItem || null);
-  }, [product, favoriteProduct]);
+  const existingProduct = product?._id
+    ? favoriteProduct.find((item) => item?._id === product._id)
+    : null;
 
   const handleFavorite = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();

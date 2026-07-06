@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { client } from "@/sanity/lib/client";
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   // 1. Vérifier l'authentification
@@ -82,6 +83,27 @@ export async function POST(req: NextRequest) {
       status: "pending",
       orderDate: new Date().toISOString(),
     });
+
+  if (order.email) {
+    await sendOrderConfirmationEmail({
+      to: order.email,
+      customerName: order.customerName || "Client",
+      orderNumber: order.orderNumber,
+      items: items.map((item: { id: string; quantity: number }) => {
+        const product = products.find(
+          (p: { _id: string }) => p._id === item.id,
+        );
+        return {
+          name: product?.name ?? "Produit",
+          quantity: item.quantity,
+          price: product?.discountedPrice ?? product?.price ?? 0,
+        };
+      }),
+      totalPrice: total,
+      currency: "XOF",
+      address,
+    });
+  }
 
   return NextResponse.json({
     success: true,

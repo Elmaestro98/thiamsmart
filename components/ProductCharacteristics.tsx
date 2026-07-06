@@ -33,7 +33,9 @@ const ProductCharacteristics = async ({
           <p className="flex items-center justify-between">
             Description:{" "}
             <span className="font-semibold tracking-wide">
-              {product?.description}
+              {typeof product?.description === "string"
+                ? product.description
+                : "Voir ci-dessus"}
             </span>
           </p>
 

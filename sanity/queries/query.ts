@@ -15,7 +15,7 @@ const LATEST_BLOG_QUERY = defineQuery(
 );
 
 const DEAL_PRODUCTS = defineQuery(`
-  *[_type == 'product' && status == 'promotion']
+  *[_type == 'product' && status == 'promotion' && references(*[_type == "store" && slug.current == "keur-massar"]._id)]
   | order(name asc) {
 
     _id,
@@ -54,7 +54,11 @@ const DEAL_PRODUCTS = defineQuery(`
       _id,
       title,
       "slug": slug.current
-    }
+    },
+
+    // Avis
+    "avgRating": math::avg(*[_type == "review" && references(^._id)].rating),
+    "reviewCount": count(*[_type == "review" && references(^._id)])
   }
 `);
 
@@ -67,7 +71,7 @@ const BRAND_QUERY = defineQuery(`*[_type == "product" && slug.current == $slug]{
   }`);
 
 const MY_ORDERS_QUERY =
-  defineQuery(`*[_type == 'order' && clerkUserId == $userId] | order(orderData desc){
+  defineQuery(`*[_type == 'order' && clerkUserId == $userId] | order(orderDate desc){
 ...,products[]{
   ...,product->
 }
@@ -105,9 +109,10 @@ const BLOG_CATEGORIES = defineQuery(
 
 //Top produit
 
-const TOP_PRODUCTS_QUERY = `*[_type == "product"][0...5]{
+const TOP_PRODUCTS_QUERY = `*[_type == "product" && references(*[_type == "store" && slug.current == "keur-massar"]._id)][0...5]{
   _id,
   name,
+  "slug": slug.current,
   "image": images[0],
   "imageUrl": images[0].asset->url,
   "imageDimensions": images[0].asset->metadata.dimensions
@@ -147,7 +152,7 @@ const CATEGORIES_QUERY =
 
 // 🆕 Requête pour récupérer les produits d'une catégorie spécifique
 const PRODUCTS_BY_CATEGORY_QUERY =
-  defineQuery(`*[_type == "product" && references($categoryId)] | order(name asc) {
+  defineQuery(`*[_type == "product" && references($categoryId) && references(*[_type == "store" && slug.current == "keur-massar"]._id)] | order(name asc) {
   _id,
   name,
   "slug": slug.current,
@@ -174,6 +179,35 @@ const PRODUCT_FULL_QUERY =
   }
 }`);
 
+// 🆕 Requête pour récupérer toutes les boutiques (carte)
+const STORES_QUERY = defineQuery(`*[_type == "store"] | order(ordre asc) {
+  _id,
+  nom,
+  "slug": slug.current,
+  adresse,
+  telephone,
+  position
+}`);
+
+// 🆕 Requête pour récupérer UNE boutique via son slug
+const STORE_BY_SLUG_QUERY = defineQuery(`*[_type == "store" && slug.current == $slug][0] {
+  _id,
+  nom,
+  "slug": slug.current,
+  adresse,
+  telephone,
+  position
+}`);
+
+// 🆕 Requête pour récupérer UNE marque via son slug
+const BRAND_BY_SLUG_QUERY = defineQuery(`*[_type == "brand" && slug.current == $slug][0] {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  image
+}`);
+
 export {
   BRANDS_QUERY,
   LATEST_BLOG_QUERY,
@@ -189,4 +223,7 @@ export {
   PRODUCTS_BY_CATEGORY_QUERY,
   PRODUCT_FULL_QUERY,
   TOP_PRODUCTS_QUERY,
+  STORES_QUERY,
+  STORE_BY_SLUG_QUERY,
+  BRAND_BY_SLUG_QUERY,
 };

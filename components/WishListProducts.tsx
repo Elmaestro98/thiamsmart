@@ -85,7 +85,13 @@ const WishListProducts = () => {
                       <td className="p-2 capitalize hidden md:table-cell">
                         {product?.categories && (
                           <p className="uppercase line-clamp-1 text-xs font-medium">
-                            {product.categories.map((cat) => cat).join(", ")}
+                            {product.categories
+                              .map((cat) =>
+                                typeof cat === "object"
+                                  ? (cat as any)?.title || (cat as any)?.titre
+                                  : cat,
+                              )
+                              .join(", ")}
                           </p>
                         )}
                       </td>

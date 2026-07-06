@@ -53,7 +53,7 @@ export default function ProductsGrid({
 
       {/* Titre de la catégorie */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
           {category.titre}
         </h1>
         <p className="text-gray-600">{products.length} produits disponibles</p>
@@ -269,7 +269,7 @@ function ProductModal({
               </p>
             )}
 
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               {product.name}
             </h2>
 
@@ -280,7 +280,7 @@ function ProductModal({
             {/* Prix */}
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-4xl font-bold text-gray-900">
+                <span className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                   {product.price.toLocaleString()} FCFA
                 </span>
                 {product.discount > product.price && (

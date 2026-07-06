@@ -55,7 +55,7 @@ function Footer() {
 
   return (
     <footer
-      className="bg-[#DBC8C8] via-amber-50 to-amber-100 border-t"
+      className="bg-shop_light_brown border-t border-white/10"
       role="contentinfo"
     >
       <Container>
@@ -63,32 +63,32 @@ function Footer() {
 
         <div className="py-8 sm:py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 sm:gap-6 lg:gap-8">
           {/* ── Section À propos ── */}
-          <div className="space-y-4 py-5 sm:py-0 border-b sm:border-b-0">
+          <div className="space-y-4 py-5 sm:py-0 border-b border-white/10 sm:border-b-0">
             <Logo />
-            <SubText>
+            <SubText className="text-white/60">
               Boostez vos performances avec notre matériel tech de dernière
               génération. Profitez de nos offres exclusives — Commandez
               {` aujourd'hui.`}
             </SubText>
             <SocialMedia
               className="text-shop_orange"
-              iconClassName="border-white hover:border-shop_light_green hover:text-shop_light_green"
-              tooltipClassName="bg-shop_light_blue text-white"
+              iconClassName="border-white/20 hover:border-shop_orange hover:text-shop_orange"
+              tooltipClassName="bg-shop_orange text-white"
             />
           </div>
 
           {/* ── Liens utiles — accordion sur mobile ── */}
-          <div className="border-b sm:border-b-0">
+          <div className="border-b border-white/10 sm:border-b-0">
             <button
               className="w-full flex items-center justify-between py-4 sm:py-0 sm:pointer-events-none"
               onClick={() => toggleSection("links")}
               aria-expanded={openSection === "links"}
             >
-              <span className="font-bold text-base tracking-wide">
+              <span className="font-bold text-white tracking-wide">
                 Liens utiles
               </span>
               <span
-                className="sm:hidden text-gray-400 text-lg transition-transform duration-300 inline-block"
+                className="sm:hidden text-white/40 text-lg transition-transform duration-300 inline-block"
                 style={{
                   transform:
                     openSection === "links" ? "rotate(180deg)" : "rotate(0deg)",
@@ -112,7 +112,7 @@ function Footer() {
                   <li key={item?.title}>
                     <Link
                       href={item?.href}
-                      className="text-sm sm:text-base hover:text-shop_light_green hoverEffect font-medium transition-colors duration-200"
+                      className="text-sm text-white/60 sm:text-base hover:text-shop_orange hoverEffect font-medium transition-colors duration-200"
                     >
                       {item?.title}
                     </Link>
@@ -123,17 +123,17 @@ function Footer() {
           </div>
 
           {/* ── Catégories — accordion sur mobile ── */}
-          <div className="border-b sm:border-b-0">
+          <div className="border-b border-white/10 sm:border-b-0">
             <button
               className="w-full flex items-center justify-between py-4 sm:py-0 sm:pointer-events-none"
               onClick={() => toggleSection("categories")}
               aria-expanded={openSection === "categories"}
             >
-              <span className="font-bold text-base tracking-wide">
+              <span className="font-bold text-white tracking-wide">
                 Catégories
               </span>
               <span
-                className="sm:hidden text-gray-400 text-lg transition-transform duration-300 inline-block"
+                className="sm:hidden text-white/40 text-lg transition-transform duration-300 inline-block"
                 style={{
                   transform:
                     openSection === "categories"
@@ -158,7 +158,7 @@ function Footer() {
                   <li key={item?.title}>
                     <Link
                       href={`/category/${item?.href}`}
-                      className="text-sm sm:text-base hover:text-shop_light_green hoverEffect font-medium transition-colors duration-200"
+                      className="text-sm text-white/60 sm:text-base hover:text-shop_orange hoverEffect font-medium transition-colors duration-200"
                     >
                       {item?.title}
                     </Link>
@@ -170,8 +170,8 @@ function Footer() {
 
           {/* ── Newsletter ── */}
           <div className="space-y-3 sm:space-y-4 py-5 sm:py-0 sm:col-span-2 lg:col-span-1">
-            <Subtitle>Newsletter</Subtitle>
-            <SubText>
+            <Subtitle className="text-white">Newsletter</Subtitle>
+            <SubText className="text-white/60">
               Abonnez-vous pour recevoir nos actualités et offres exclusives.
             </SubText>
             <form
@@ -189,7 +189,7 @@ function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isSubmitting}
-                className="w-full text-sm"
+                className="w-full text-sm bg-white text-shop_darkColor placeholder:text-gray-400 border-white/20"
               />
               <Button
                 type="submit"
@@ -203,8 +203,8 @@ function Footer() {
         </div>
 
         {/* ── Copyright ── */}
-        <div className="py-4 sm:py-6 border-t text-center text-xs sm:text-sm text-gray-600">
-          © {currentYear} <Logo />. Tous droits réservés.
+        <div className="py-4 sm:py-6 border-t border-white/10 text-center text-xs sm:text-sm text-white/40">
+          © {currentYear} Tous droits réservés.
         </div>
       </Container>
     </footer>

@@ -1,6 +1,7 @@
 import { sanityFetch } from "../lib/live";
 import {
   BLOG_CATEGORIES,
+  BRAND_BY_SLUG_QUERY,
   BRAND_QUERY,
   BRANDS_QUERY,
   DEAL_PRODUCTS,
@@ -10,6 +11,8 @@ import {
   OTHERS_BLOG_QUERY,
   PRODUCT_BY_SLUG_QUERY,
   SINGLE_BLOG_QUERY,
+  STORES_QUERY,
+  STORE_BY_SLUG_QUERY,
 } from "./query";
 
 const getCategories = async (quantity?: number) => {
@@ -151,6 +154,42 @@ const getOthersBlog = async (slug: string, quantity: number) => {
     return [];
   }
 };
+const getStores = async () => {
+  try {
+    const { data } = await sanityFetch({ query: STORES_QUERY });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching stores:", error);
+    return [];
+  }
+};
+
+const getStoreBySlug = async (slug: string) => {
+  try {
+    const { data } = await sanityFetch({
+      query: STORE_BY_SLUG_QUERY,
+      params: { slug },
+    });
+    return data ?? null;
+  } catch (error) {
+    console.log("Error fetching store by slug:", error);
+    return null;
+  }
+};
+
+const getBrandBySlug = async (slug: string) => {
+  try {
+    const { data } = await sanityFetch({
+      query: BRAND_BY_SLUG_QUERY,
+      params: { slug },
+    });
+    return data ?? null;
+  } catch (error) {
+    console.log("Error fetching brand by slug:", error);
+    return null;
+  }
+};
+
 export {
   getCategories,
   getAllBrands,
@@ -163,4 +202,7 @@ export {
   getSingleBlog,
   getBlogCategories,
   getOthersBlog,
+  getStores,
+  getStoreBySlug,
+  getBrandBySlug,
 };

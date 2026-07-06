@@ -2,8 +2,8 @@ export const headerData = [
   { title: "Accueil", href: "/" },
   { title: "Shop", href: "/shop" },
   { title: "BonPlans", href: "/deal" },
+  { title: "Nos boutiques", href: "/boutiques" },
   { title: "Contact", href: "#contact" },
-  { title: "Apropos", href: "/about" },
   { title: "FAQ", href: "/faq" },
 ];
 
@@ -24,11 +24,10 @@ export const productType = [
 ];
 
 export const quickLinksData = [
-  { title: "Apropos de nous", href: "/about" },
-  { title: "Contactez-nous", href: "/contact" },
+  { title: "Contactez-nous", href: "#contact" },
+  { title: "Nos boutiques", href: "/boutiques" },
   { title: "Politique de vente", href: "/privacy" },
-  { title: "FAQs", href: "/faqs" },
-  { title: "Aide", href: "/help" },
+  { title: "FAQs", href: "/faq" },
 ];
 
 export const categoriesData = [

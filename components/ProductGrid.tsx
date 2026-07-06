@@ -7,6 +7,7 @@ import Container from "./Container";
 import { Loader2 } from "lucide-react";
 import client from "@/sanity/lib/client";
 import HomeTabbar from "./HommeTabbar";
+import Pagination from "./Pagination";
 import { productType } from "@/app/constants/data";
 import Image, { StaticImageData } from "next/image";
 import { ads1 } from "@/images/banner";
@@ -40,12 +41,15 @@ const ads: Ad[] = [
   },
 ];
 
+const PRODUCTS_PER_PAGE = 10;
+
 const ProductGrid = () => {
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(false);
   // Utiliser la value pour le filtre, mais garder le title pour l'affichage
   const [selectedTab, setSelectedTab] = useState(productType[0]?.value || "");
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -57,8 +61,11 @@ const ProductGrid = () => {
   const currentAd = ads[currentAdIndex];
 
   useEffect(() => {
-    const query = `*[_type == "product" && variant == $variant] | order(name asc){
-      ...,"categories": categories[]->title
+    const query = `*[_type == "product" && variant == $variant && references(*[_type == "store" && slug.current == "keur-massar"]._id)] | order(name asc){
+      ...,
+      "categories": categories[]->title,
+      "avgRating": math::avg(*[_type == "review" && references(^._id)].rating),
+      "reviewCount": count(*[_type == "review" && references(^._id)])
     }`;
     const params = { variant: selectedTab };
 
@@ -67,6 +74,7 @@ const ProductGrid = () => {
       try {
         const response = await client.fetch(query, params);
         setProducts(response);
+        setCurrentPage(1);
       } catch (error) {
         console.log("Erreur de récupération du produit", error);
       } finally {
@@ -79,6 +87,12 @@ const ProductGrid = () => {
   // Trouver le title correspondant à la value pour l'affichage dans HomeTabbar
   const selectedTabTitle =
     productType.find((t) => t.value === selectedTab)?.title || "";
+
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE,
+  );
 
   return (
     <Container className="flex flex-col lg:px-0 my-10">
@@ -129,21 +143,28 @@ const ProductGrid = () => {
           </motion.div>
         </div>
       ) : products?.length ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-4">
-          <AnimatePresence>
-            {products?.map((product) => (
-              <motion.div
-                key={product?._id}
-                layout
-                initial={{ opacity: 0.2 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <ProductCard product={product} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-4">
+            <AnimatePresence>
+              {paginatedProducts?.map((product) => (
+                <motion.div
+                  key={product?._id}
+                  layout
+                  initial={{ opacity: 0.2 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
       ) : (
         <NoProductAvailable selectedTab={selectedTabTitle} />
       )}

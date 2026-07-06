@@ -77,7 +77,7 @@ export default function CategoryGrid() {
       {/* Grille des catégories */}
       {!selectedCategory ? (
         <div className="p-6">
-          <h2 className="text-3xl font-bold mb-8">Catégories</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-8">Catégories</h2>
 
           {loading ? (
             <div className="flex justify-center items-center h-64">

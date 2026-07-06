@@ -33,7 +33,7 @@ const NoProductAvailable = ({
         className="text-gray-600"
       >
         Nous sommes désolés, mais il {` n'y`} a pas de produits correspondant à{" "}
-        <span className="text-base font-semibold text-darkColor">
+        <span className="text-base font-semibold text-gray-900">
           {selectedTab}
         </span>{" "}
         pour le moment.

@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Container from "@/components/Container";
 import ProductCard, { ProductData } from "@/components/ProductCard";
 import { Category, DEAL_PRODUCTS_RESULT } from "@/sanity.types";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -33,11 +34,11 @@ const EmptyState = () => {
     >
       <span className="text-5xl mb-4">😔</span>
 
-      <h3 className="text-lg font-semibold text-stone-700">
+      <h3 className="text-lg font-semibold text-gray-800">
         Aucun produit trouvé
       </h3>
 
-      <p className="text-sm text-stone-400 mt-2">
+      <p className="text-sm text-gray-400 mt-2">
         Aucun bon plan disponible dans cette catégorie.
       </p>
     </div>
@@ -65,11 +66,23 @@ const DealClient = ({ products, categories }: DealClientProps) => {
 
       ...categories.map((category) => ({
         id: category._id,
-        label: category.titre || "Sans catégorie",
+        label: category.title || (category as any).titre || "Sans catégorie",
         value: category._id,
       })),
     ];
   }, [categories]);
+
+  // Calculer dynamiquement le dernier jour du mois en cours pour la bannière
+  const [expiryDate, setExpiryDate] = useState("");
+  useEffect(() => {
+    const now = new Date();
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const options: Intl.DateTimeFormatOptions = {
+      day: "numeric",
+      month: "long",
+    };
+    setExpiryDate(lastDay.toLocaleDateString("fr-FR", options));
+  }, []);
 
   // ───────────────────────────────────────────────────────────
   // Filtered Products
@@ -92,21 +105,22 @@ const DealClient = ({ products, categories }: DealClientProps) => {
   // ───────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-amber-100 py-10">
+    <div className="min-h-screen bg-gray-50/50 py-10">
       <Container>
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-4 mb-8">
           <div>
-            <p className="text-xs uppercase tracking-widest text-amber-700 font-medium mb-1">
+            <p className="text-xs uppercase tracking-widest text-shop_orange font-bold mb-1">
               🔥 Offres exclusives
             </p>
 
-            <h1 className="text-3xl font-bold text-stone-900">
-              Bons Plans du mois
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Bons Plans du Mois
             </h1>
 
             <p className="text-sm text-stone-500 mt-2">
-              Stocks limités · Offres valables jusqu&apos;au 31 mai
+              Stocks limités · Offres valables jusqu&apos;au{" "}
+              {expiryDate || "la fin du mois"}
             </p>
           </div>
 
@@ -136,7 +150,7 @@ const DealClient = ({ products, categories }: DealClientProps) => {
                   ${
                     isActive
                       ? "bg-orange-500 border-orange-500 text-white shadow-md"
-                      : "bg-white border-stone-200 text-stone-600 hover:border-orange-400 hover:text-orange-500"
+                      : "bg-white border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-500"
                   }
                 `}
               >
@@ -153,18 +167,21 @@ const DealClient = ({ products, categories }: DealClientProps) => {
               <EmptyState />
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {filteredProducts.map((product, index) => (
-                <div
-                  key={product._id}
-                  className="animate-fade-up"
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                  }}
-                >
-                  <ProductCard product={product as unknown as ProductData} />
-                </div>
-              ))}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map((product) => (
+                  <motion.div
+                    key={product._id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ProductCard product={product as unknown as ProductData} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </section>

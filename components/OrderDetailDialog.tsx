@@ -70,7 +70,7 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0 rounded-2xl">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0 rounded-2xl">
         {/* Header */}
         <div className="bg-gradient-to-r from-gray-900 to-gray-700 text-white px-6 py-5 rounded-t-2xl">
           <DialogHeader>

@@ -8,9 +8,16 @@ import { useSearchParams, useRouter } from "next/navigation";
 import BrandList from "./shop/BrandList";
 import PriceList from "./shop/PriceList";
 import { dynamicClient } from "@/sanity/lib/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, SlidersHorizontal } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard, { ProductData } from "./ProductCard";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 
 interface Props {
   categories: (Category & { productCount: number })[];
@@ -32,6 +39,7 @@ const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Unique useEffect : fetch produits quand un filtre change
   useEffect(() => {
@@ -49,6 +57,7 @@ const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
 
         const query = `
           *[_type == 'product'
+            && references(*[_type == "store" && slug.current == "keur-massar"]._id)
             && ($selectedCategory == null || $selectedCategory in categories[]->slug.current)
             && ($selectedBrand == null || brand->slug.current == $selectedBrand)
             && price >= $minPrice && price <= $maxPrice
@@ -56,7 +65,9 @@ const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
           ]
           | order(name asc) {
             ...,
-            "categories": categories[]->title
+            "categories": categories[]->title,
+            "avgRating": math::avg(*[_type == "review" && references(^._id)].rating),
+            "reviewCount": count(*[_type == "review" && references(^._id)])
           }
         `;
 
@@ -94,48 +105,73 @@ const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
     }
   };
 
+  const filtersContent = (
+    <>
+      <CategoryList
+        categories={categories}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+      />
+      <BrandList
+        brands={brands}
+        setSelectedBrand={setSelectedBrand}
+        selectedBrand={selectedBrand}
+      />
+      <PriceList
+        setSelectedPrice={setSelectedPrice}
+        selectedPrice={selectedPrice}
+      />
+    </>
+  );
+
   return (
     <>
       <div className="sticky top-0 z-10 mb-5">
         <div className="flex items-center justify-between">
-          <Title className="text-lg uppercase tracking-wide">
+          <Title className="text-lg text-shop_orange uppercase tracking-wide">
             {queryParam
               ? `Résultats pour "${queryParam}"`
               : "Faites votre choix !"}
           </Title>
-          {hasActiveFilters && (
-            <button
-              onClick={handleResetFilters}
-              className="text-shop_dark_green underline text-sm mt-2 font-medium hover:text-darkRed hoverEffect"
-            >
-              Réinitialiser les filtres
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {hasActiveFilters && (
+              <button
+                onClick={handleResetFilters}
+                className="text-shop_dark_green underline text-sm mt-2 font-medium hover:text-darkRed hoverEffect"
+              >
+                Réinitialiser les filtres
+              </button>
+            )}
+            {/* Bouton filtres, visible uniquement en mobile */}
+            <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+              <SheetTrigger asChild>
+                <button className="md:hidden flex items-center gap-1.5 border border-shop_dark_green/40 rounded-full px-3 py-1.5 text-sm font-medium text-shop_dark_green hoverEffect hover:bg-shop_dark_green/10">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Filtres
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left">
+                <SheetHeader>
+                  <SheetTitle>Filtres</SheetTitle>
+                </SheetHeader>
+                <div className="flex-1 overflow-y-auto scrollbar-hide">
+                  {filtersContent}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-5 border-t border-t-shop_dark_green/50">
-        {/* Sidebar filtres */}
-        <div className="md:sticky md:top-20 md:self-start md:h-[calc(100vh-160px)] md:overflow-y-auto md:min-w-64 pb-5 md:border-r border-r-shop_btn_dark_green/50 scrollbar-hide">
-          <CategoryList
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-          />
-          <BrandList
-            brands={brands}
-            setSelectedBrand={setSelectedBrand}
-            selectedBrand={selectedBrand}
-          />
-          <PriceList
-            setSelectedPrice={setSelectedPrice}
-            selectedPrice={selectedPrice}
-          />
+        {/* Sidebar filtres, visible uniquement à partir de md */}
+        <div className="hidden md:block md:sticky md:top-20 md:self-start md:h-[calc(100vh-160px)] md:overflow-y-auto md:min-w-64 pb-5 md:border-r border-r-shop_btn_dark_green/50 scrollbar-hide">
+          {filtersContent}
         </div>
 
         {/* Liste des produits */}
         <div className="flex-1 pt-5">
-          <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2 scrollbar-hide">
+          <div className="md:h-[calc(100vh-160px)] md:overflow-y-auto md:pr-2 scrollbar-hide">
             {loading ? (
               <div className="p-20 flex flex-col gap-2 items-center justify-center bg-white">
                 <Loader2 className="w-10 h-10 text-shop_dark_green animate-spin" />

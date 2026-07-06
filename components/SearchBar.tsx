@@ -94,7 +94,7 @@ function SearchBar() {
       setLoading(true);
       try {
         const data = await client.fetch(
-          `*[_type == "product" && name match $searchQuery + "*"] | order(name asc) [0...5] {
+          `*[_type == "product" && name match $searchQuery + "*" && references(*[_type == "store" && slug.current == "keur-massar"]._id)] | order(name asc) [0...5] {
             _id, name, slug, price, images,
             "category": category->name
           }`,
@@ -142,7 +142,7 @@ function SearchBar() {
       <button
         onClick={() => setIsOpen(true)}
         aria-label="Ouvrir la recherche"
-        className="group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all duration-200 w-full max-w-xs"
+        className="group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all duration-200 w-full md:max-w-md lg:max-w-lg mx-auto"
       >
         <Search className="w-4 h-4 flex-shrink-0" />
         <span className="text-sm hidden sm:block flex-1 text-left">
@@ -157,7 +157,7 @@ function SearchBar() {
       {/* Overlay + Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center pt-16 md:pt-24 px-4"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto pt-4 pb-4 px-3 sm:pt-16 sm:px-4 md:pt-24"
           style={{
             background: "rgba(0,0,0,0.65)",
             backdropFilter: "blur(6px)",
@@ -165,7 +165,7 @@ function SearchBar() {
           onClick={close}
         >
           <div
-            className="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
+            className="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[80dvh]"
             style={{
               animation: "searchSlideIn 0.2s cubic-bezier(0.16,1,0.3,1) both",
             }}
@@ -174,7 +174,7 @@ function SearchBar() {
             {/* Champ de recherche */}
             <form
               onSubmit={handleSearch}
-              className="flex items-center border-b border-gray-100 px-4"
+              className="flex items-center border-b border-gray-100 px-3 sm:px-4 shrink-0"
             >
               <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
               <input
@@ -183,13 +183,13 @@ function SearchBar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Que cherchez-vous ?"
-                className="flex-1 h-14 px-4 text-base text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none"
+                className="flex-1 min-w-0 h-14 px-3 sm:px-4 text-base text-gray-900 placeholder-gray-400 bg-transparent focus:outline-none"
               />
               {query && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
                   aria-label="Effacer"
                 >
                   <X className="w-4 h-4" />
@@ -197,14 +197,15 @@ function SearchBar() {
               )}
               <button
                 type="submit"
-                className="ml-2 px-4 py-2 rounded-lg bg-shop_light_brown text-white text-sm font-medium hover:bg-shop_orange transition-colors"
+                className="ml-2 px-3 sm:px-4 py-2 rounded-lg bg-shop_light_brown text-white text-sm font-medium hover:bg-shop_orange transition-colors shrink-0"
               >
-                Rechercher
+                <Search className="w-4 h-4 sm:hidden" />
+                <span className="hidden sm:inline">Rechercher</span>
               </button>
             </form>
 
             {/* Contenu */}
-            <div className="max-h-[60vh] overflow-y-auto overscroll-contain">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
               {/* Recherches récentes */}
               {showRecent && (
                 <div className="p-4">
@@ -326,7 +327,7 @@ function SearchBar() {
             </div>
 
             {/* Footer avec raccourci */}
-            <div className="border-t border-gray-100 px-4 py-2.5 flex items-center justify-end gap-4 text-xs text-gray-400">
+            <div className="hidden sm:flex shrink-0 border-t border-gray-100 px-4 py-2.5 items-center justify-end gap-4 text-xs text-gray-400">
               <span>
                 <kbd className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">
                   ↵

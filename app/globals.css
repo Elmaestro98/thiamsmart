@@ -13,4 +13,31 @@
   --color_lightColor: #52525b;
   --color_lightOrange: #fe5a1d;
   --color-deal-bg: #f1f3f8;
+
+  --color-border: #e2e8f0;
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+  --color-ring: #09090b;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  .hoverEffect {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  button {
+    @apply hover:cursor-pointer;
+  }
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

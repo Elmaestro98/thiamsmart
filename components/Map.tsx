@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapPin, Phone, Navigation } from "lucide-react";
+import { MapPin, Phone, Navigation, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 
 export interface Boutique {
   id: number;
@@ -12,6 +13,7 @@ export interface Boutique {
   adresse: string;
   position: [number, number];
   telephone?: string;
+  slug?: string;
 }
 
 const BOUTIQUES: Boutique[] = [
@@ -31,8 +33,32 @@ const BOUTIQUES: Boutique[] = [
   },
 ];
 
+// Boutique telle que renvoyée par Sanity (position au format geopoint)
+export interface SanityStore {
+  _id: string;
+  nom: string;
+  slug?: string;
+  adresse: string;
+  telephone?: string;
+  position: { lat: number; lng: number } | null;
+}
+
 interface MapProps {
   boutiques?: Boutique[];
+  stores?: SanityStore[];
+}
+
+function storesToBoutiques(stores: SanityStore[]): Boutique[] {
+  return stores
+    .filter((store) => store.position)
+    .map((store, index) => ({
+      id: index,
+      nom: store.nom,
+      slug: store.slug,
+      adresse: store.adresse,
+      telephone: store.telephone,
+      position: [store.position!.lat, store.position!.lng],
+    }));
 }
 
 const customIcon = new L.Icon({
@@ -43,33 +69,41 @@ const customIcon = new L.Icon({
   popupAnchor: [1, -34],
 });
 
-export default function Map({ boutiques = BOUTIQUES }: MapProps) {
+export default function Map({ boutiques, stores }: MapProps) {
+  const resolvedBoutiques = useMemo<Boutique[]>(() => {
+    if (stores && stores.length > 0) return storesToBoutiques(stores);
+    if (boutiques && boutiques.length > 0) return boutiques;
+    return BOUTIQUES;
+  }, [boutiques, stores]);
+
   const center = useMemo<[number, number]>(() => {
-    if (!boutiques.length) return [14.7742082, -17.3163897];
+    if (!resolvedBoutiques.length) return [14.7742082, -17.3163897];
     const lat =
-      boutiques.reduce((sum, b) => sum + b.position[0], 0) / boutiques.length;
+      resolvedBoutiques.reduce((sum, b) => sum + b.position[0], 0) /
+      resolvedBoutiques.length;
     const lng =
-      boutiques.reduce((sum, b) => sum + b.position[1], 0) / boutiques.length;
+      resolvedBoutiques.reduce((sum, b) => sum + b.position[1], 0) /
+      resolvedBoutiques.length;
     return [lat, lng];
-  }, [boutiques]);
+  }, [resolvedBoutiques]);
 
   return (
-    <MapContainer
-      center={center}
-      zoom={6}
-      style={{
-        height: "500px",
-        width: "100%",
-        borderRadius: "12px",
-        zIndex: 0,
-      }}
-    >
+    <div className="h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-xl overflow-hidden">
+      <MapContainer
+        center={center}
+        zoom={6}
+        style={{
+          height: "100%",
+          width: "100%",
+          zIndex: 0,
+        }}
+      >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
 
-      {boutiques.map((boutique) => (
+      {resolvedBoutiques.map((boutique) => (
         <Marker
           key={boutique.id}
           position={boutique.position}
@@ -98,19 +132,32 @@ export default function Map({ boutiques = BOUTIQUES }: MapProps) {
                 </div>
               )}
 
-              <a
-                href={`https://www.google.com/maps?q=${boutique.position[0]},${boutique.position[1]}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-shop_orange text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 transition-colors no-underline"
-              >
-                <Navigation className="w-4 h-4" />
-                Itinéraire
-              </a>
+              <div className="flex flex-col gap-2">
+                <a
+                  href={`https://www.google.com/maps?q=${boutique.position[0]},${boutique.position[1]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 bg-shop_orange text-white px-3 py-2 rounded-lg text-sm font-semibold hover:bg-orange-600 transition-colors no-underline"
+                >
+                  <Navigation className="w-4 h-4" />
+                  Itinéraire
+                </a>
+
+                {boutique.slug && (
+                  <Link
+                    href={`/boutique/${boutique.slug}`}
+                    className="flex items-center justify-center gap-2 border border-shop_orange text-shop_orange px-3 py-2 rounded-lg text-sm font-semibold hover:bg-shop_orange hover:text-white transition-colors no-underline"
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    Voir les produits
+                  </Link>
+                )}
+              </div>
             </div>
           </Popup>
         </Marker>
       ))}
-    </MapContainer>
+      </MapContainer>
+    </div>
   );
 }

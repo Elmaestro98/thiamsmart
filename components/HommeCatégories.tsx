@@ -25,7 +25,7 @@ const HomeCategories = ({
           </Title>
         </div>
         <Link
-          href="/category/manette"
+          href="/shop"
           className="group flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-shop_light_brown transition-colors duration-200"
         >
           <span className="hidden sm:inline">Toutes les catégories</span>

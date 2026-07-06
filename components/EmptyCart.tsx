@@ -49,7 +49,7 @@ export default function EmptyCart() {
         </motion.div>
 
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-bold text-gray-800">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
             Votre panier est vide
           </h2>
           <p className="text-gray-600">
@@ -61,7 +61,7 @@ export default function EmptyCart() {
         <div>
           <Link
             href="/"
-            className="block bg-darkColor/5 border border-darkColor/20 text-center py-2.5 rounded-full text-sm font-semibold tracking-wide hover:border-darkColor hover:bg-darkColor hover:text-white hoverEffect capitalize"
+            className="block bg-darkColor/5 border border-darkColor/20 text-center py-2.5 rounded-full text-sm font-semibold tracking-wide hover:border-darkColor hover:bg-shop_light_brown hover:text-white hoverEffect capitalize"
           >
             Découvrir les produits
           </Link>

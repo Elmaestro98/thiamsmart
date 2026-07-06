@@ -25,7 +25,7 @@ import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import useStore from "@/store";
 import { useAuth } from "@clerk/nextjs";
-import { Lock, MessageCircle, ShoppingBag, Trash2 } from "lucide-react";
+import { Check, Lock, MessageCircle, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -186,10 +186,13 @@ const AddressSection = ({
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 const CartPage = () => {
-  const { deleteCartProduct, getTotalPrice, getItemCount, resetCart } =
-    useStore();
+  const { deleteCartProduct, getTotalPrice, resetCart } = useStore();
 
   const groupedItems = useStore((state) => state.getGroupedItems());
+  const itemCount = groupedItems.reduce(
+    (sum, { quantity }) => sum + quantity,
+    0,
+  );
   const { isSignedIn, userId } = useAuth();
 
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -400,7 +403,7 @@ const CartPage = () => {
                 <ShoppingBag className="text-muted-foreground w-5 h-5" />
                 <Title>Panier</Title>
                 <span className="text-sm text-muted-foreground">
-                  ({getItemCount()} article{getItemCount() > 1 ? "s" : ""})
+                  ({itemCount} article{itemCount > 1 ? "s" : ""})
                 </span>
               </div>
 
@@ -411,43 +414,60 @@ const CartPage = () => {
                     {groupedItems.map(({ product, quantity }) => (
                       <div
                         key={product._id}
-                        className="flex items-center gap-4 p-4 border-b last:border-b-0"
+                        className="flex items-center gap-4 p-4 md:p-5 border-b last:border-b-0 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/40"
                       >
                         {/* Image */}
                         {product?.images && (
                           <Link
                             href={`/product/${product?.slug?.current}`}
-                            className="shrink-0 rounded-lg overflow-hidden border group"
+                            className="shrink-0 rounded-xl overflow-hidden border bg-white dark:bg-gray-800 p-1.5 shadow-sm group"
                           >
                             <Image
                               src={urlFor(product.images[0]).url()}
                               alt={product.name ?? "Produit"}
-                              width={96}
-                              height={96}
+                              width={112}
+                              height={112}
                               loading="lazy"
-                              className="w-20 h-20 md:w-24 md:h-24 object-cover group-hover:scale-105 transition-transform duration-200"
+                              className="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover group-hover:scale-105 transition-transform duration-200"
                             />
                           </Link>
                         )}
 
                         {/* Infos */}
                         <div className="flex-1 min-w-0">
-                          <h2 className="text-sm font-medium line-clamp-1 mb-1">
-                            {product?.name}
-                          </h2>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                            <span className="capitalize">
-                              {product?.variant}
-                            </span>
-                            <span
-                              className={`capitalize font-medium ${
-                                product?.status === "En stock"
-                                  ? "text-green-600"
-                                  : "text-orange-500"
-                              }`}
-                            >
-                              {product?.status}
-                            </span>
+                          <Link href={`/product/${product?.slug?.current}`}>
+                            <h2 className="text-sm md:text-base font-semibold line-clamp-1 mb-1.5 hover:text-primary transition-colors">
+                              {product?.name}
+                            </h2>
+                          </Link>
+                          <div className="flex items-center flex-wrap gap-1.5 mb-3">
+                            {product?.variant && (
+                              <span className="capitalize text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-muted-foreground">
+                                {product.variant}
+                              </span>
+                            )}
+                            {product?.status && (
+                              <span
+                                className={`flex items-center gap-1 capitalize text-xs font-medium px-2 py-0.5 rounded-full ${
+                                  product.status === "nouveau"
+                                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400"
+                                    : product.status === "tendance"
+                                      ? "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400"
+                                      : "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+                                }`}
+                              >
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    product.status === "nouveau"
+                                      ? "bg-blue-500"
+                                      : product.status === "tendance"
+                                        ? "bg-purple-500"
+                                        : "bg-red-500"
+                                  }`}
+                                />
+                                {product.status}
+                              </span>
+                            )}
                           </div>
 
                           {/* Actions */}
@@ -491,7 +511,7 @@ const CartPage = () => {
                         <div className="text-right shrink-0">
                           <PriceFormatter
                             amount={(product.price as number) * quantity}
-                            className="font-semibold text-base"
+                            className="font-bold text-base md:text-lg"
                           />
                           {quantity > 1 && (
                             <p className="text-xs text-muted-foreground mt-0.5">
@@ -524,24 +544,25 @@ const CartPage = () => {
                 {/* ── Sidebar ── */}
                 <div className="lg:col-span-1 space-y-4">
                   {/* Récapitulatif desktop */}
-                  <div className="hidden md:block bg-white dark:bg-gray-900 border rounded-xl p-5">
-                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-4">
+                  <div className="hidden md:block bg-white dark:bg-gray-900 border rounded-xl p-5 shadow-sm lg:sticky lg:top-4">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                       Récapitulatif
                     </p>
-                    <div className="space-y-2 text-sm text-muted-foreground">
+                    <div className="space-y-2.5 text-sm text-muted-foreground">
                       <div className="flex justify-between">
-                        <span>Sous-total</span>
+                        <span>Articles ({itemCount})</span>
                         <PriceFormatter amount={getTotalPrice()} />
                       </div>
                       <div className="flex justify-between">
                         <span>Livraison</span>
-                        <span className="text-green-600 font-medium">
+                        <span className="flex items-center gap-1 text-green-600 font-medium">
+                          <Check className="w-3.5 h-3.5" />
                           Gratuite
                         </span>
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="flex items-baseline justify-between mb-5">
+                    <div className="flex items-baseline justify-between mb-5 bg-gray-50 dark:bg-gray-800/60 rounded-lg px-3 py-3">
                       <span className="font-semibold">Total</span>
                       <PriceFormatter
                         amount={getTotalPrice()}

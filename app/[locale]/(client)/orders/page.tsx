@@ -2,7 +2,6 @@ import Container from "@/components/Container";
 import OrdersComponent from "@/components/OrdersComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getMyOrders } from "@/sanity/queries";
 import { auth } from "@clerk/nextjs/server";
 import {
@@ -15,51 +14,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-
-// Utilitaire pour traduire les statuts en français
-export const translateOrderStatus = (
-  status: string,
-): { label: string; color: string } => {
-  const statusMap: Record<string, { label: string; color: string }> = {
-    paid: {
-      label: "Payé",
-      color: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    },
-    unpaid: {
-      label: "En attente de paiement",
-      color: "bg-[#fb6c08]/10 text-[#fb6c08] border-[#fb6c08]/30",
-    },
-    pending: {
-      label: "En attente",
-      color: "bg-[#fb6c08]/10 text-[#fb6c08] border-[#fb6c08]/30",
-    },
-    processing: {
-      label: "En traitement",
-      color: "bg-[#26619c]/10 text-[#26619c] border-[#26619c]/30",
-    },
-    shipped: {
-      label: "Expédié",
-      color: "bg-[#26619c]/10 text-[#26619c] border-[#26619c]/30",
-    },
-    delivered: {
-      label: "Livré",
-      color: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    },
-    cancelled: {
-      label: "Annulé",
-      color: "bg-red-100 text-red-700 border-red-200",
-    },
-    refunded: {
-      label: "Remboursé",
-      color: "bg-purple-100 text-purple-700 border-purple-200",
-    },
-    default: {
-      label: status ?? "Inconnu",
-      color: "bg-gray-100 text-gray-600 border-gray-200",
-    },
-  };
-  return statusMap[status?.toLowerCase()] ?? statusMap.default;
-};
 
 const OrdersPage = async () => {
   const { userId } = await auth();
@@ -96,7 +50,7 @@ const OrdersPage = async () => {
               </div>
 
               {/* Statistiques rapides */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div
                   className="flex items-center gap-2 rounded-xl px-4 py-2.5 border"
                   style={{ background: "#fb6c0812", borderColor: "#fb6c0830" }}
@@ -109,7 +63,10 @@ const OrdersPage = async () => {
                     {
                       orders.filter(
                         (o: any) =>
-                          o.status === "pending" || o.status === "processing",
+                          o.status === "En_Attente" ||
+                          o.status === "En_Traitement" ||
+                          o.status === "Expédiée" ||
+                          o.status === "En_cours",
                       ).length
                     }{" "}
                     en cours
@@ -127,7 +84,7 @@ const OrdersPage = async () => {
                     {
                       orders.filter(
                         (o: any) =>
-                          o.status === "delivered" || o.status === "paid",
+                          o.status === "Livrée" || o.status === "Payée",
                       ).length
                     }{" "}
                     livrées
@@ -155,10 +112,7 @@ const OrdersPage = async () => {
               </CardHeader>
 
               <CardContent className="p-0">
-                <ScrollArea>
-                  <OrdersComponent orders={orders} />
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
+                <OrdersComponent orders={orders} />
               </CardContent>
             </Card>
 
@@ -224,16 +178,3 @@ const OrdersPage = async () => {
 };
 
 export default OrdersPage;
-
-// ─── Badge de statut réutilisable ────────────────────────────────────────────
-// Utilisation dans OrdersComponent : <OrderStatusBadge status={order.status} />
-export const OrderStatusBadge = ({ status }: { status: string }) => {
-  const { label, color } = translateOrderStatus(status);
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${color}`}
-    >
-      {label}
-    </span>
-  );
-};

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { categories, faqs } from "@/app/constants/faqData";
 import FAQAccordionItem from "@/components/Faqaccordionitem";
+import Title from "@/components/Title";
 
 export default function FAQPage() {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -37,9 +38,10 @@ export default function FAQPage() {
               <i className="ti ti-help-circle" aria-hidden="true"></i>
               Centre d&rsquo;aide
             </div>
-            <h1 className="text-4xl font-bold text-stone-900 mb-4 tracking-tight">
+            <Title className="text-2xl md:text-3xl font-bold text-shop_light_brown leading-tight">
               Questions fréquentes
-            </h1>
+            </Title>
+
             <p className="text-stone-500 text-lg mb-10 max-w-xl mx-auto">
               Trouvez rapidement une réponse à vos questions sur nos produits,
               livraisons et services.
@@ -70,7 +72,6 @@ export default function FAQPage() {
             </div>
           </div>
         </section>
-
         {/* Category tabs */}
         <section className="bg-white border-b border-stone-200 sticky top-0 z-10 shadow-sm">
           <div className="max-w-4xl mx-auto px-4">
@@ -95,8 +96,6 @@ export default function FAQPage() {
             </div>
           </div>
         </section>
-
-        {/* FAQ list */}
         <section className="max-w-4xl mx-auto px-4 py-10">
           {filteredFaqs.length > 0 ? (
             <>
@@ -154,12 +153,12 @@ export default function FAQPage() {
                 Vous n&rsquo;avez pas trouvé votre réponse ?
               </h2>
               <p className="text-orange-100 text-sm">
-                Notre équipe est disponible du lundi au samedi, 9h–19h.
+                Notre équipe est disponible 7j/7j | 24h/24.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <a
-                href="tel:+33123456789"
+                href="tel:+221774714545"
                 className="flex items-center gap-2 bg-white text-orange-600 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-orange-50 transition-colors"
               >
                 <i className="ti ti-phone" aria-hidden="true"></i>

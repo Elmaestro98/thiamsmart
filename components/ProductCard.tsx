@@ -13,6 +13,8 @@ import { Flame, Package } from "lucide-react";
 
 export type ProductData = Omit<Product, "categories"> & {
   categories?: (string | null)[] | null;
+  avgRating?: number | null;
+  reviewCount?: number | null;
 };
 
 interface Props {
@@ -24,6 +26,8 @@ const ProductCard = ({ product }: Props) => {
   const stockRestant = (product.stock ?? 0) - cartQuantity;
   const isOutOfStock = stockRestant <= 0;
   const isPromotion = product?.status === "promotion";
+  const reviewCount = product?.reviewCount ?? 0;
+  const avgRating = product?.avgRating ?? 0;
 
   return (
     <div className="relative text-sm border border-gray-200 rounded-xl group bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
@@ -62,7 +66,7 @@ const ProductCard = ({ product }: Props) => {
         {/* Status Badges */}
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex flex-col gap-1.5 sm:gap-2">
           {isPromotion ? (
-            <div className="bg-gradient-to-r from-shop_light_blue to-blue-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold shadow-lg backdrop-blur-sm border border-white/20 flex items-center gap-1 sm:gap-1.5 animate-pulse">
+            <div className="bg-gradient-to-r from-shop_ligh_blue to-blue-600 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold shadow-lg backdrop-blur-sm border border-white/20 flex items-center gap-1 sm:gap-1.5 animate-pulse">
               <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></span>
               En Promo
             </div>
@@ -94,9 +98,15 @@ const ProductCard = ({ product }: Props) => {
         {/* Category */}
         {product?.categories && (
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <div className="h-1 w-1 rounded-full bg-shop_light_blue flex-shrink-0"></div>
+            <div className="h-1 w-1 rounded-full bg-shop_ligh_blue flex-shrink-0"></div>
             <p className="uppercase text-[10px] sm:text-xs font-semibold tracking-wider text-shop_orange line-clamp-1">
-              {product.categories.map((cat) => cat).join(" • ")}
+              {product.categories
+                .map((cat) =>
+                  typeof cat === "object"
+                    ? (cat as any)?.title || (cat as any)?.titre
+                    : cat,
+                )
+                .join(" • ")}
             </p>
           </div>
         )}
@@ -113,26 +123,32 @@ const ProductCard = ({ product }: Props) => {
         </Link>
 
         {/* Rating — masqué sur très petit écran pour gagner de la place */}
-        <div className="hidden xs:flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, index) => (
-              <StarIcon
-                key={index}
-                className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-200 ${
-                  index < 4 ? "text-amber-400 drop-shadow-sm" : "text-gray-300"
-                }`}
-                fill={index < 4 ? "#fbbf24" : "#d1d5db"}
-              />
-            ))}
+        {reviewCount > 0 && (
+          <div className="hidden xs:flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, index) => (
+                <StarIcon
+                  key={index}
+                  className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-200 ${
+                    index < Math.round(avgRating)
+                      ? "text-amber-400 drop-shadow-sm"
+                      : "text-gray-300"
+                  }`}
+                  fill={index < Math.round(avgRating) ? "#fbbf24" : "#d1d5db"}
+                />
+              ))}
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs font-medium text-gray-900">
+                {avgRating.toFixed(1)}
+              </span>
+              <span className="text-[10px] sm:text-xs text-gray-400">•</span>
+              <span className="text-[10px] sm:text-xs text-gray-500">
+                {reviewCount} avis
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] sm:text-xs font-medium text-gray-900">
-              4.0
-            </span>
-            <span className="text-[10px] sm:text-xs text-gray-400">•</span>
-            <span className="text-[10px] sm:text-xs text-gray-500">5 avis</span>
-          </div>
-        </div>
+        )}
 
         {/* Stock Status */}
         <div className="flex items-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg bg-gray-50 border border-gray-100">
@@ -170,7 +186,7 @@ const ProductCard = ({ product }: Props) => {
       </div>
 
       {/* Decorative bottom bar */}
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-shop_light_blue via-shop_light_green to-shop_orange transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-shop_ligh_blue via-shop_light_green to-shop_orange transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
     </div>
   );
 };

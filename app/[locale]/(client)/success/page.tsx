@@ -1,438 +1,280 @@
 "use client";
 
 import Container from "@/components/Container";
-import EmptyCart from "@/components/EmptyCart";
-import NoAccess from "@/components/NoAccess";
 import PriceFormatter from "@/components/PriceFormatter";
-import ProductSideMenu from "@/components/ProductSideMenu";
-import QuantityButtons from "@/components/QuantityButtons";
-import Title from "@/components/Title";
-import PriceView from "@/components/PriceView";
-import AddAddressModal from "@/components/AddAddressModal";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Address } from "@/sanity.types";
+import { Skeleton } from "@/components/ui/skeleton";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
-import useStore from "@/store";
 import { useAuth } from "@clerk/nextjs";
-import { MessageCircle, ShoppingBag, Trash } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Package,
+  Truck,
+  ChevronLeft,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
-const CartPage = () => {
-  const {
-    deleteCartProduct,
-    getTotalPrice,
-    getItemCount,
-    getSubTotalPrice,
-    resetCart,
-  } = useStore();
+// Définition des étapes de commande
+const ORDER_STATUS_STEPS = [
+  { status: "En_Attente", label: "Commande reçue", icon: Clock },
+  { status: "Preparation", label: "En préparation", icon: Package },
+  { status: "Expediee", label: "En cours de livraison", icon: Truck },
+  { status: "Livree", label: "Livrée", icon: CheckCircle2 },
+];
 
-  const [showAddressModal, setShowAddressModal] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [loadingWhatsapp, setLoadingWhatsapp] = useState(false);
-
-  const groupedItems = useStore((state) => state.getGroupedItems());
-  const { isSignedIn } = useAuth();
-  const [addresses, setAddresses] = useState<Address[] | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-
-  const fetchAddresses = async () => {
-    setLoading(true);
-    try {
-      const query = `*[_type=="address"] | order(publishedAt desc)`;
-      const data = await client.fetch(query);
-      setAddresses(data);
-      const defaultAddress = data.find((addr: Address) => addr.default);
-      if (defaultAddress) {
-        setSelectedAddress(defaultAddress);
-      } else if (data.length > 0) {
-        setSelectedAddress(data[0]);
-      }
-    } catch (error) {
-      toast.error(
-        "Erreur lors de la récupération des adresses. Veuillez réessayer.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+const OrderTrackingPage = () => {
+  const { id } = useParams();
+  const { userId, isSignedIn } = useAuth();
+  const router = useRouter();
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAddresses();
-  }, []);
+    if (!isSignedIn) return;
 
-  const handleResetCart = () => {
-    const confirmed = window.confirm(
-      "Êtes-vous sûr de vouloir réinitialiser votre panier ?",
-    );
-    if (confirmed) {
-      resetCart();
-      toast.success("Panier réinitialisé avec succès !");
-    }
-  };
-
-  // ─── Construire le message WhatsApp ────────────────────────────────────────
-  const buildWhatsAppMessage = () => {
-    const lines: string[] = [];
-    lines.push("🛒 *Nouvelle commande*");
-    lines.push("");
-    lines.push("*Produits :*");
-
-    groupedItems.forEach(({ product, quantity }) => {
-      const total = (product?.price as number) * quantity;
-      lines.push(
-        `• ${product?.name} (x${quantity}) — ${total.toLocaleString("fr-FR")} FCFA`,
-      );
-    });
-
-    lines.push("");
-    lines.push(`*Total : ${getTotalPrice().toLocaleString("fr-FR")} FCFA*`);
-    lines.push("");
-    lines.push("*Adresse de livraison :*");
-
-    if (selectedAddress) {
-      lines.push(
-        `${selectedAddress.name}, ${selectedAddress.address}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zip}`,
-      );
-    }
-
-    return encodeURIComponent(lines.join("\n"));
-  };
-
-  // ─── COMMANDER : WhatsApp uniquement ───────────────────────────────────────
-  const handleCommander = async () => {
-    if (!selectedAddress) {
-      toast.error("Veuillez sélectionner une adresse de livraison");
-      return;
-    }
-
-    setLoadingWhatsapp(true);
-
-    try {
-      const message = buildWhatsAppMessage();
-      const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-      toast.success("Commande envoyée sur WhatsApp !");
-    } catch (error) {
-      console.error("Erreur WhatsApp:", error);
-      toast.error("Une erreur est survenue. Réessayer");
-    } finally {
-      setLoadingWhatsapp(false);
-    }
-  };
-
-  // ─── PASSER À LA CAISSE : API checkout (Wave) + WhatsApp ───────────────────
-  const handleCheckout = async () => {
-    if (!selectedAddress) {
-      toast.error("Veuillez sélectionner une adresse de livraison");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // 1. Envoyer sur WhatsApp
-      const message = buildWhatsAppMessage();
-      const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-
-      // 2. Appel API checkout (validation stock + lien Wave)
-      const items = groupedItems.map(({ product, quantity }) => ({
-        id: product._id,
-        quantity,
-      }));
-
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, addressId: selectedAddress._id }),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        toast.error(error.error || "Erreur lors du paiement.");
-        return;
+    const fetchOrderDetails = async () => {
+      try {
+        const query = `*[_type == "order" && _id == $id && clerkUserId == $userId][0]{
+          ...,
+          products[]{
+            ...,
+            product->{
+              name,
+              images,
+              price
+            }
+          }
+        }`;
+        const data = await client.fetch(query, { id, userId });
+        setOrder(data);
+      } catch (error) {
+        console.error("Erreur tracking:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const { checkoutUrl } = await res.json();
+    fetchOrderDetails();
+  }, [id, userId, isSignedIn]);
 
-      // 3. Redirection vers le lien de paiement Wave
-      window.location.href = checkoutUrl;
-    } catch (error) {
-      console.error("Erreur lors du paiement:", error);
-      toast.error("Une erreur est survenue. Réessayer");
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <Container className="py-10">
+        <Skeleton className="h-10 w-40 mb-6" />
+        <div className="grid gap-6">
+          <Skeleton className="h-64 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-xl" />
+        </div>
+      </Container>
+    );
+  }
 
-  // ─── Boutons réutilisables (desktop + mobile) ──────────────────────────────
-  const ActionButtons = ({ fullWidth = false }: { fullWidth?: boolean }) => (
-    <div className={`flex flex-col gap-3 ${fullWidth ? "w-full" : ""}`}>
-      {/* Commander — WhatsApp uniquement */}
-      <Button
-        className={`rounded-full font-semibold tracking-wide hoverEffect bg-green-500 hover:bg-green-600 text-white ${fullWidth ? "w-full" : ""}`}
-        size="lg"
-        disabled={loadingWhatsapp || loading}
-        onClick={handleCommander}
-      >
-        <MessageCircle className="w-4 h-4 mr-2" />
-        {loadingWhatsapp ? "Envoi en cours..." : "Commander via WhatsApp"}
-      </Button>
+  if (!order) {
+    return (
+      <Container className="py-20 text-center">
+        <h2 className="text-2xl font-bold">Commande introuvable</h2>
+        <p className="text-muted-foreground mt-2">
+          Désolé, nous ne trouvons pas cette commande dans votre historique.
+        </p>
+        <Link
+          href="/"
+          className="text-shop_orange hover:underline mt-4 inline-block"
+        >
+          Retour à la boutique
+        </Link>
+      </Container>
+    );
+  }
 
-      {/* Passer à la caisse — Wave + WhatsApp */}
-      <Button
-        className={`rounded-full font-semibold tracking-wide hoverEffect ${fullWidth ? "w-full" : ""}`}
-        size="lg"
-        disabled={loading || loadingWhatsapp}
-        onClick={handleCheckout}
-      >
-        {loading ? "Veuillez patienter..." : "Passer à la caisse (Wave)"}
-      </Button>
-    </div>
+  // Calcul de l'index de l'étape actuelle
+  const currentStepIndex = ORDER_STATUS_STEPS.findIndex(
+    (s) => s.status === order.status,
   );
+  const isCancelled = order.status === "Annulee";
 
   return (
-    <div className="bg-gray-50 pb-52 md:pb-10">
-      {isSignedIn ? (
-        <Container>
-          {groupedItems?.length ? (
-            <>
-              <div className="flex items-center gap-2 py-5">
-                <ShoppingBag className="text-darkColor" />
-                <Title>Panier</Title>
-              </div>
-              <div className="grid lg:grid-cols-3 md:gap-8">
-                <div className="lg:col-span-2 rounded-lg">
-                  <div className="border bg-white rounded-md">
-                    {groupedItems?.map(({ product }) => {
-                      const itemCount = getItemCount(product?._id);
-                      return (
+    <div className="bg-gray-50/50 min-h-screen pb-20">
+      <Container className="py-8">
+        {/* Retour et En-tête */}
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Retour
+        </button>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Commande #{order.orderNumber}
+            </h1>
+            <p className="text-muted-foreground">
+              Passée le{" "}
+              {new Date(order.orderDate).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </p>
+          </div>
+          <Badge
+            variant={isCancelled ? "destructive" : "outline"}
+            className="w-fit text-sm px-3 py-1"
+          >
+            {order.status.replace("_", " ")}
+          </Badge>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Colonne Gauche : Stepper et Produits */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* STEPPER VISUEL */}
+            <Card className="border-none shadow-sm">
+              <CardContent className="p-4 sm:p-6 md:p-10">
+                <div className="relative flex justify-between items-center w-full">
+                  {/* Ligne de progression en arrière-plan */}
+                  <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
+                  <div
+                    className="absolute top-1/2 left-0 h-0.5 bg-green-500 -translate-y-1/2 z-0 transition-all duration-500"
+                    style={{
+                      width: `${(currentStepIndex / (ORDER_STATUS_STEPS.length - 1)) * 100}%`,
+                    }}
+                  />
+
+                  {ORDER_STATUS_STEPS.map((step, index) => {
+                    const Icon = step.icon;
+                    const isCompleted = index <= currentStepIndex;
+                    const isCurrent = index === currentStepIndex;
+
+                    return (
+                      <div
+                        key={step.status}
+                        className="relative z-10 flex flex-col items-center"
+                      >
                         <div
-                          key={product?._id}
-                          className="border-b p-2.5 last:border-b-0 flex items-center justify-between gap-5"
+                          className={`
+                          w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 transition-colors duration-300
+                          ${isCompleted ? "bg-green-500 border-green-500 text-white" : "bg-white border-gray-200 text-gray-400"}
+                          ${isCurrent ? "ring-4 ring-green-100" : ""}
+                        `}
                         >
-                          <div className="flex flex-1 items-start gap-2 h-36 md:h-44">
-                            {product?.images && (
-                              <Link
-                                href={`/product/${product?.slug?.current}`}
-                                className="border p-0.5 md:p-1 mr-2 rounded-md overflow-hidden group"
-                              >
-                                <Image
-                                  src={urlFor(product?.images[0]).url()}
-                                  alt="productImage"
-                                  width={500}
-                                  height={500}
-                                  loading="lazy"
-                                  className="w-32 md:w-40 h-32 md:h-40 object-cover group-hover:scale-105 hoverEffect"
-                                />
-                              </Link>
-                            )}
-                            <div className="h-full flex flex-1 flex-col justify-between py-1">
-                              <div className="flex flex-col gap-0.5 md:gap-1.5">
-                                <h2 className="text-base font-semibold line-clamp-1">
-                                  {product?.name}
-                                </h2>
-                                <p className="text-sm capitalize">
-                                  Variante:{" "}
-                                  <span className="font-semibold">
-                                    {product?.variant}
-                                  </span>
-                                </p>
-                                <p className="text-sm capitalize">
-                                  Statut:{" "}
-                                  <span className="font-semibold">
-                                    {product?.status}
-                                  </span>
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <ProductSideMenu
-                                        product={product}
-                                        className="relative top-0 right-0"
-                                      />
-                                    </TooltipTrigger>
-                                    <TooltipContent className="font-bold">
-                                      Ajouter aux favoris
-                                    </TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <Trash
-                                        onClick={() => {
-                                          deleteCartProduct(product?._id);
-                                          toast.success(
-                                            "Produit supprimé avec succès !",
-                                          );
-                                        }}
-                                        className="w-4 h-4 md:w-5 md:h-5 mr-1 text-gray-500 hover:text-red-600 hoverEffect"
-                                      />
-                                    </TooltipTrigger>
-                                    <TooltipContent className="font-bold bg-red-600">
-                                      Supprimer le produit
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-start justify-between h-36 md:h-44 p-0.5 md:p-1">
-                            <PriceFormatter
-                              amount={(product?.price as number) * itemCount}
-                              className="font-bold text-lg"
-                            />
-                            <QuantityButtons product={product} />
-                          </div>
+                          <Icon className="w-5 h-5 md:w-6 h-6" />
                         </div>
-                      );
-                    })}
-                    <Button
-                      onClick={handleResetCart}
-                      className="m-5 font-semibold"
-                      variant="destructive"
-                    >
-                      Réinitialiser le panier
-                    </Button>
-                  </div>
+                        <span
+                          className={`absolute -bottom-8 w-14 sm:w-auto text-center text-[9px] sm:text-[10px] md:text-xs font-medium leading-tight whitespace-normal sm:whitespace-nowrap ${isCompleted ? "text-foreground" : "text-muted-foreground"}`}
+                        >
+                          {step.label}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
+              </CardContent>
+            </Card>
 
-                <div>
-                  <div className="lg:col-span-1">
-                    {/* Desktop order summary */}
-                    <div className="hidden md:inline-block w-full bg-white p-6 rounded-lg border">
-                      <div className="space-y-4">
-                        <Separator />
-                        <div className="flex items-center justify-between font-semibold text-lg">
-                          <span>Total</span>
-                          <PriceFormatter
-                            amount={getTotalPrice()}
-                            className="text-lg font-bold text-black"
+            {/* ARTICLES */}
+            <Card className="border-none shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Détails des articles</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {order.products?.map((item: any, idx: number) => (
+                    <div key={idx} className="flex items-center gap-4 p-4">
+                      <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-100 border shrink-0">
+                        {item.product?.images && (
+                          <Image
+                            src={urlFor(item.product.images[0]).url()}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
                           />
-                        </div>
-                        <ActionButtons fullWidth />
+                        )}
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-medium truncate">
+                          {item.product?.name}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          Qté : {item.quantity}
+                        </p>
+                      </div>
+                      <PriceFormatter
+                        amount={item.product?.price * item.quantity}
+                        className="text-sm font-semibold"
+                      />
                     </div>
-
-                    {/* Addresses */}
-                    {addresses && (
-                      <div className="bg-white rounded-md mt-5">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Adresse de livraison</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <RadioGroup
-                              defaultValue={addresses
-                                ?.find((addr) => addr.default)
-                                ?._id.toString()}
-                            >
-                              {addresses?.map((address) => (
-                                <div
-                                  key={address?._id}
-                                  onClick={() => setSelectedAddress(address)}
-                                  className={`flex items-center space-x-2 mb-4 cursor-pointer ${
-                                    selectedAddress?._id === address?._id &&
-                                    "text-shop_dark_green"
-                                  }`}
-                                >
-                                  <RadioGroupItem
-                                    value={address?._id.toString()}
-                                  />
-                                  <Label
-                                    htmlFor={`address-${address?._id}`}
-                                    className="grid gap-1.5 flex-1"
-                                  >
-                                    <span className="font-semibold">
-                                      {address?.name}
-                                    </span>
-                                    <span className="text-sm text-black/60">
-                                      {address.address}, {address.city},{" "}
-                                      {address.state} {address.zip}
-                                    </span>
-                                  </Label>
-                                </div>
-                              ))}
-                            </RadioGroup>
-                            <Button
-                              variant="outline"
-                              className="w-full mt-4"
-                              onClick={() => setShowAddressModal(true)}
-                            >
-                              Ajouter une nouvelle adresse
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )}
+                  ))}
+                </div>
+                <div className="p-4 bg-gray-50/50">
+                  <div className="flex justify-between items-center font-bold">
+                    <span>Total payé</span>
+                    <PriceFormatter
+                      amount={order.totalPrice}
+                      className="text-lg text-shop_orange"
+                    />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                {/* Mobile order summary */}
-                <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2">
-                  <div className="bg-white p-4 rounded-lg border mx-4">
-                    <h2 className="capitalize mb-3">
-                      Récapitulatif de la commande
-                    </h2>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span>Sous-total</span>
-                        <PriceView price={getSubTotalPrice()} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Remise</span>
-                        <PriceView
-                          price={
-                            getSubTotalPrice() > getTotalPrice()
-                              ? getSubTotalPrice() - getTotalPrice()
-                              : 0
-                          }
-                        />
-                      </div>
-                      <Separator />
-                      <div className="flex items-center justify-between font-semibold text-lg">
-                        <span>Total</span>
-                        <PriceFormatter
-                          amount={getTotalPrice()}
-                          className="text-lg font-bold text-black"
-                        />
-                      </div>
-                      <ActionButtons fullWidth />
-                    </div>
+          {/* Colonne Droite : Infos Livraison & Support */}
+          <div className="space-y-6">
+            <Card className="border-none shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-shop_blue" />
+                  Adresse de livraison
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm space-y-1">
+                <p className="font-semibold">{order.address?.name}</p>
+                <p className="text-muted-foreground">
+                  {order.address?.address}
+                </p>
+                <p className="text-muted-foreground">
+                  {order.address?.city}, {order.address?.state}
+                </p>
+                <p className="text-muted-foreground">{order.address?.zip}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-sm bg-shop_blue text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-white/10 rounded-lg">
+                    <Phone className="w-5 h-5" />
                   </div>
+                  <h3 className="font-semibold">Besoin d'aide ?</h3>
                 </div>
-              </div>
-            </>
-          ) : (
-            <EmptyCart />
-          )}
-        </Container>
-      ) : (
-        <NoAccess />
-      )}
-
-      <AddAddressModal
-        open={showAddressModal}
-        onClose={() => setShowAddressModal(false)}
-        onSuccess={fetchAddresses}
-      />
+                <p className="text-sm text-blue-100 mb-4">
+                  Une question sur votre livraison ? Nos agents sont disponibles
+                  pour vous répondre.
+                </p>
+                <a
+                  href="tel:+221774714545"
+                  className="block w-full py-2 bg-white text-shop_blue text-center rounded-lg font-bold hover:bg-blue-50 transition-colors"
+                >
+                  +221 77 471 45 45
+                </a>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </Container>
     </div>
   );
 };
 
-export default CartPage;
+export default OrderTrackingPage;

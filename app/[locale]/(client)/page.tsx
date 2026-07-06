@@ -5,8 +5,9 @@ import ProductGrid from "@/components/ProductGrid";
 import Topproduct from "@/components/Topproduct";
 import HomeCategories from "@/components/HommeCatégories";
 import ShopByBrands from "@/components/ShopByBrands";
-import { getCategories } from "@/sanity/queries";
+import { getCategories, getStores } from "@/sanity/queries";
 import MapLoader from "@/components/MapLoader";
+import HomeBoutiques from "@/components/HomeBoutiques";
 
 export const metadata: Metadata = {
   title: "Accueil",
@@ -15,7 +16,10 @@ export const metadata: Metadata = {
 };
 
 const Home = async () => {
-  const categories = await getCategories(6);
+  const [categories, stores] = await Promise.all([
+    getCategories(6),
+    getStores(),
+  ]);
   return (
     <Container>
       <HommeBanner />
@@ -25,7 +29,8 @@ const Home = async () => {
       </div>
       <HomeCategories categories={categories} />
       <ShopByBrands />
-      <MapLoader />
+      <MapLoader stores={stores} />
+      <HomeBoutiques stores={stores} />
     </Container>
   );
 };
