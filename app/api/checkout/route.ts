@@ -1,8 +1,11 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { client } from "@/sanity/lib/client";
 import { NextRequest, NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { nanoid } from "nanoid";
+import {
+  sendOrderConfirmationEmail,
+  sendAdminOrderNotificationEmail,
+} from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   // 1. Vérifier l'authentification côté serveur
@@ -107,7 +110,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const orderNumber = `CMD-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const orderNumber = `CMD-${nanoid(8).toUpperCase()}`;
 
     const order = await writeClient.create({
       _type: "order",
@@ -128,7 +131,7 @@ export async function POST(req: NextRequest) {
         zip: addressData.zip,
       },
       products: items.map((item: any) => ({
-        _key: uuidv4(),
+        _key: nanoid(),
         product: { _type: "reference", _ref: item.id },
         quantity: item.quantity,
       })),
@@ -144,20 +147,31 @@ export async function POST(req: NextRequest) {
 
     const waveUrl = `${process.env.WAVE_PAYMENT_URL}?${paymentParams.toString()}`;
 
+    const orderItems = items.map((item: { id: string; quantity: number }) => {
+      const product = products.find((p: { _id: string }) => p._id === item.id);
+      return {
+        name: product?.name ?? "Produit",
+        quantity: item.quantity,
+        price: product?.price ?? 0,
+      };
+    });
+
     await sendOrderConfirmationEmail({
       to: userEmail,
       customerName: order.customerName || "Client",
       orderNumber: order.orderNumber,
-      items: items.map((item: { id: string; quantity: number }) => {
-        const product = products.find(
-          (p: { _id: string }) => p._id === item.id,
-        );
-        return {
-          name: product?.name ?? "Produit",
-          quantity: item.quantity,
-          price: product?.price ?? 0,
-        };
-      }),
+      items: orderItems,
+      totalPrice: totalAmount,
+      currency: "XOF",
+      address: addressData,
+    });
+
+    await sendAdminOrderNotificationEmail({
+      customerName: order.customerName || "Client",
+      customerEmail: userEmail,
+      customerPhone: user.phoneNumbers?.[0]?.phoneNumber,
+      orderNumber: order.orderNumber,
+      items: orderItems,
       totalPrice: totalAmount,
       currency: "XOF",
       address: addressData,

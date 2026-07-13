@@ -2,7 +2,7 @@
 
 import Container from "@/components/Container";
 import PriceFormatter from "@/components/PriceFormatter";
-import { Badge } from "@/components/ui/badge";
+import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,12 +23,13 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Définition des étapes de commande
+// Définition des étapes de commande — les valeurs de "status" doivent
+// correspondre exactement à celles définies dans sanity/schemaTypes/orderTypes.ts
 const ORDER_STATUS_STEPS = [
   { status: "En_Attente", label: "Commande reçue", icon: Clock },
-  { status: "Preparation", label: "En préparation", icon: Package },
-  { status: "Expediee", label: "En cours de livraison", icon: Truck },
-  { status: "Livree", label: "Livrée", icon: CheckCircle2 },
+  { status: "En_Traitement", label: "En préparation", icon: Package },
+  { status: "En_cours", label: "En cours de livraison", icon: Truck },
+  { status: "Livrée", label: "Livrée", icon: CheckCircle2 },
 ];
 
 const OrderTrackingPage = () => {
@@ -99,7 +100,7 @@ const OrderTrackingPage = () => {
   const currentStepIndex = ORDER_STATUS_STEPS.findIndex(
     (s) => s.status === order.status,
   );
-  const isCancelled = order.status === "Annulee";
+  const isCancelled = order.status === "Annulée";
 
   return (
     <div className="bg-gray-50/50 min-h-screen pb-20">
@@ -127,60 +128,63 @@ const OrderTrackingPage = () => {
               })}
             </p>
           </div>
-          <Badge
-            variant={isCancelled ? "destructive" : "outline"}
-            className="w-fit text-sm px-3 py-1"
-          >
-            {order.status.replace("_", " ")}
-          </Badge>
+          <OrderStatusBadge status={order.status} />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Colonne Gauche : Stepper et Produits */}
           <div className="lg:col-span-2 space-y-6">
-            {/* STEPPER VISUEL */}
-            <Card className="border-none shadow-sm">
-              <CardContent className="p-4 sm:p-6 md:p-10">
-                <div className="relative flex justify-between items-center w-full">
-                  {/* Ligne de progression en arrière-plan */}
-                  <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
-                  <div
-                    className="absolute top-1/2 left-0 h-0.5 bg-green-500 -translate-y-1/2 z-0 transition-all duration-500"
-                    style={{
-                      width: `${(currentStepIndex / (ORDER_STATUS_STEPS.length - 1)) * 100}%`,
-                    }}
-                  />
+            {/* STEPPER VISUEL (masqué si la commande est annulée) */}
+            {isCancelled ? (
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-6 text-center text-red-600 font-medium">
+                  Cette commande a été annulée.
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-4 sm:p-6 md:p-10">
+                  <div className="relative flex justify-between items-center w-full">
+                    {/* Ligne de progression en arrière-plan */}
+                    <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -translate-y-1/2 z-0" />
+                    <div
+                      className="absolute top-1/2 left-0 h-0.5 bg-green-500 -translate-y-1/2 z-0 transition-all duration-500"
+                      style={{
+                        width: `${Math.max(0, currentStepIndex / (ORDER_STATUS_STEPS.length - 1)) * 100}%`,
+                      }}
+                    />
 
-                  {ORDER_STATUS_STEPS.map((step, index) => {
-                    const Icon = step.icon;
-                    const isCompleted = index <= currentStepIndex;
-                    const isCurrent = index === currentStepIndex;
+                    {ORDER_STATUS_STEPS.map((step, index) => {
+                      const Icon = step.icon;
+                      const isCompleted = index <= currentStepIndex;
+                      const isCurrent = index === currentStepIndex;
 
-                    return (
-                      <div
-                        key={step.status}
-                        className="relative z-10 flex flex-col items-center"
-                      >
+                      return (
                         <div
-                          className={`
-                          w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 transition-colors duration-300
-                          ${isCompleted ? "bg-green-500 border-green-500 text-white" : "bg-white border-gray-200 text-gray-400"}
-                          ${isCurrent ? "ring-4 ring-green-100" : ""}
-                        `}
+                          key={step.status}
+                          className="relative z-10 flex flex-col items-center"
                         >
-                          <Icon className="w-5 h-5 md:w-6 h-6" />
+                          <div
+                            className={`
+                            w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 transition-colors duration-300
+                            ${isCompleted ? "bg-green-500 border-green-500 text-white" : "bg-white border-gray-200 text-gray-400"}
+                            ${isCurrent ? "ring-4 ring-green-100" : ""}
+                          `}
+                          >
+                            <Icon className="w-5 h-5 md:w-6 h-6" />
+                          </div>
+                          <span
+                            className={`absolute -bottom-8 w-14 sm:w-auto text-center text-[9px] sm:text-[10px] md:text-xs font-medium leading-tight whitespace-normal sm:whitespace-nowrap ${isCompleted ? "text-foreground" : "text-muted-foreground"}`}
+                          >
+                            {step.label}
+                          </span>
                         </div>
-                        <span
-                          className={`absolute -bottom-8 w-14 sm:w-auto text-center text-[9px] sm:text-[10px] md:text-xs font-medium leading-tight whitespace-normal sm:whitespace-nowrap ${isCompleted ? "text-foreground" : "text-muted-foreground"}`}
-                        >
-                          {step.label}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* ARTICLES */}
             <Card className="border-none shadow-sm">
