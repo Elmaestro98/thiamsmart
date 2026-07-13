@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // Définition des étapes de commande — les valeurs de "status" doivent
@@ -33,14 +33,18 @@ const ORDER_STATUS_STEPS = [
 ];
 
 const OrderTrackingPage = () => {
-  const { id } = useParams();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("orderId");
   const { userId, isSignedIn } = useAuth();
   const router = useRouter();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!isSignedIn || !id) {
+      setLoading(false);
+      return;
+    }
 
     const fetchOrderDetails = async () => {
       try {

@@ -335,10 +335,11 @@ const CartPage = () => {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const errorData = await res.json();
         toast.error(
-          errorData.error || "Erreur lors de la création de la commande.",
+          data.error || "Erreur lors de la création de la commande.",
         );
         return;
       }
@@ -347,7 +348,7 @@ const CartPage = () => {
 
       // FIX : on vide le panier uniquement après confirmation de l'envoi WhatsApp
       resetCart();
-      window.location.href = "/success";
+      window.location.href = `/success?orderId=${data.orderId}`;
     } catch {
       toast.error("Une erreur est survenue. Réessayez.");
     } finally {
