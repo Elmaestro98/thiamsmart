@@ -26,17 +26,26 @@ interface Props {
 
 interface ShopContentProps extends Props {
   queryParam: string | null;
+  categoryParam: string | null;
 }
 
 // ─── Composant interne ────────────────────────────────────────────────────────
-// Reçoit queryParam en "key" depuis Shop : quand la recherche change, React
-// démonte/remonte ce composant → le state local est réinitialisé sans useEffect.
-const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
+// Reçoit queryParam/categoryParam en "key" depuis Shop : quand la recherche ou
+// la catégorie change, React démonte/remonte ce composant → le state local est
+// réinitialisé sans useEffect.
+const ShopContent = ({
+  categories,
+  brands,
+  queryParam,
+  categoryParam,
+}: ShopContentProps) => {
   const router = useRouter();
 
   const [products, setProducts] = useState<ProductData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    categoryParam,
+  );
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -100,7 +109,7 @@ const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
     setSelectedCategory(null);
     setSelectedBrand(null);
     setSelectedPrice(null);
-    if (queryParam) {
+    if (queryParam || categoryParam) {
       router.push("/shop");
     }
   };
@@ -199,6 +208,7 @@ const ShopContent = ({ categories, brands, queryParam }: ShopContentProps) => {
 const Shop = ({ categories, brands }: Props) => {
   const searchParams = useSearchParams();
   const queryParam = searchParams?.get("q") ?? null;
+  const categoryParam = searchParams?.get("category") ?? null;
 
   if (
     !categories ||
@@ -229,10 +239,11 @@ const Shop = ({ categories, brands }: Props) => {
           sans aucun useEffect avec setState → zéro cascade de renders.
         */}
         <ShopContent
-          key={queryParam ?? "default"}
+          key={`${queryParam ?? "q"}-${categoryParam ?? "c"}`}
           categories={categories}
           brands={brands}
           queryParam={queryParam}
+          categoryParam={categoryParam}
         />
       </Container>
     </div>

@@ -4,7 +4,6 @@ import Container from "./Container";
 import Logo from "./Logo";
 import CartIcon from "./CartIcon";
 
-import LangSwitcher from "./LangSwitcher";
 import FavoriteButton from "./FavoriteButton";
 import HeaderMenu from "./HeaderMenu";
 import SearchBar from "./SearchBar";
@@ -29,13 +28,6 @@ const Header = () => {
           <p className="text-white/60 text-xs">
             Livraison rapide partout au Sénégal
           </p>
-
-          <nav
-            aria-label="Liens utiles"
-            className="flex items-center gap-4 text-white/60 text-xs"
-          >
-            <LangSwitcher />
-          </nav>
         </Container>
       </div>
 
