@@ -7,12 +7,37 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-const BrandPage = async ({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) => {
+const BASE_URL = "https://thiamsmart.com";
+
+type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const brand = await getBrandBySlug(slug);
+
+  if (!brand) return { title: "Marque non trouvée" };
+
+  const brandUrl = `${BASE_URL}/brand/${slug}`;
+  const description =
+    brand.description ||
+    `Découvrez tous les produits de la marque ${brand.title} sur ThiamSmart.`;
+
+  return {
+    title: brand.title,
+    description,
+    alternates: { canonical: brandUrl },
+    openGraph: {
+      title: brand.title ?? "",
+      description,
+      url: brandUrl,
+      ...(brand.image && { images: [{ url: urlFor(brand.image).url() }] }),
+    },
+  };
+}
+
+const BrandPage = async ({ params }: Props) => {
   const { slug } = await params;
   const [brand, categories] = await Promise.all([
     getBrandBySlug(slug),
@@ -21,8 +46,32 @@ const BrandPage = async ({
 
   if (!brand) return notFound();
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: BASE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Boutique",
+        item: `${BASE_URL}/shop`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: brand.title,
+        item: `${BASE_URL}/brand/${slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="py-10 bg-gray-50/50 min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <Container>
         <nav className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-8">
           <Link href="/" className="hover:text-shop_orange transition-colors">

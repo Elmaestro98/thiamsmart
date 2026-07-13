@@ -13,6 +13,10 @@ import {
   SINGLE_BLOG_QUERY,
   STORES_QUERY,
   STORE_BY_SLUG_QUERY,
+  SITEMAP_PRODUCTS_QUERY,
+  SITEMAP_CATEGORIES_QUERY,
+  SITEMAP_BRANDS_QUERY,
+  SITEMAP_STORES_QUERY,
 } from "./query";
 
 const getCategories = async (quantity?: number) => {
@@ -190,6 +194,46 @@ const getBrandBySlug = async (slug: string) => {
   }
 };
 
+const getSitemapProducts = async () => {
+  try {
+    const { data } = await sanityFetch({ query: SITEMAP_PRODUCTS_QUERY });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching sitemap products:", error);
+    return [];
+  }
+};
+
+const getSitemapCategories = async () => {
+  try {
+    const { data } = await sanityFetch({ query: SITEMAP_CATEGORIES_QUERY });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching sitemap categories:", error);
+    return [];
+  }
+};
+
+const getSitemapBrands = async () => {
+  try {
+    const { data } = await sanityFetch({ query: SITEMAP_BRANDS_QUERY });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching sitemap brands:", error);
+    return [];
+  }
+};
+
+const getSitemapStores = async () => {
+  try {
+    const { data } = await sanityFetch({ query: SITEMAP_STORES_QUERY });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching sitemap stores:", error);
+    return [];
+  }
+};
+
 export {
   getCategories,
   getAllBrands,
@@ -205,4 +249,8 @@ export {
   getStores,
   getStoreBySlug,
   getBrandBySlug,
+  getSitemapProducts,
+  getSitemapCategories,
+  getSitemapBrands,
+  getSitemapStores,
 };

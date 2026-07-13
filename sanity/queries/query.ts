@@ -208,6 +208,20 @@ const BRAND_BY_SLUG_QUERY = defineQuery(`*[_type == "brand" && slug.current == $
   image
 }`);
 
+// 🆕 Requêtes légères pour le sitemap (uniquement slug + date de mise à jour)
+const SITEMAP_PRODUCTS_QUERY = defineQuery(
+  `*[_type == "product" && defined(slug.current)]{ "slug": slug.current, _updatedAt }`,
+);
+const SITEMAP_CATEGORIES_QUERY = defineQuery(
+  `*[_type == "category" && defined(slug.current)]{ "slug": slug.current, _updatedAt }`,
+);
+const SITEMAP_BRANDS_QUERY = defineQuery(
+  `*[_type == "brand" && defined(slug.current)]{ "slug": slug.current, _updatedAt }`,
+);
+const SITEMAP_STORES_QUERY = defineQuery(
+  `*[_type == "store" && defined(slug.current)]{ "slug": slug.current, _updatedAt }`,
+);
+
 export {
   BRANDS_QUERY,
   LATEST_BLOG_QUERY,
@@ -226,4 +240,8 @@ export {
   STORES_QUERY,
   STORE_BY_SLUG_QUERY,
   BRAND_BY_SLUG_QUERY,
+  SITEMAP_PRODUCTS_QUERY,
+  SITEMAP_CATEGORIES_QUERY,
+  SITEMAP_BRANDS_QUERY,
+  SITEMAP_STORES_QUERY,
 };

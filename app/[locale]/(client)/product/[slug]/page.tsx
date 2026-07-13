@@ -20,7 +20,7 @@ import { RxBorderSplit } from "react-icons/rx";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { TbTruckDelivery } from "react-icons/tb";
 
-const BASE_URL = "htt://localhost:3000";
+const BASE_URL = "https://thiamsmart.com";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -48,23 +48,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const imageUrl = product.images?.[0]
     ? urlFor(product.images[0]).width(1200).height(630).url()
-    : `${BASE_URL}/og-image.jpg`;
+    : undefined;
 
   const productUrl = `${BASE_URL}/product/${product.slug?.current}`;
 
   return {
     title: product.name,
-    description: `${product.name} disponible sur LBC Technologie.`,
+    description: `${product.name} disponible sur ThiamSmart. Livraison rapide, prix compétitifs.`,
     alternates: { canonical: productUrl },
     openGraph: {
       title: product.name ?? "",
-      images: [{ url: imageUrl, width: 1200, height: 630 }],
       url: productUrl,
+      ...(imageUrl && { images: [{ url: imageUrl, width: 1200, height: 630 }] }),
     },
     twitter: {
       card: "summary_large_image",
       title: product.name ?? "",
-      images: [imageUrl],
+      ...(imageUrl && { images: [imageUrl] }),
     },
   };
 }
@@ -94,8 +94,28 @@ const ProductPage = async ({ params }: Props) => {
       availability: isInStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      seller: { "@type": "Organization", name: "LBC Technologie" },
+      seller: { "@type": "Organization", name: "ThiamSmart" },
     },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: BASE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Produits",
+        item: `${BASE_URL}/shop`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: `${BASE_URL}/product/${product.slug?.current}`,
+      },
+    ],
   };
 
   return (
@@ -103,6 +123,10 @@ const ProductPage = async ({ params }: Props) => {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <div className="min-h-screen bg-[#fafaf8]">

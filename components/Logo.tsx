@@ -21,9 +21,6 @@ function Logo() {
           T
         </span>
         <Zap className="w-4 h-4 md:w-6 md:h-6 text-white fill-white drop-shadow" />
-        <span className="absolute -bottom-1 -right-1 md:-bottom-1.5 md:-right-1.5 text-[10px] md:text-xs leading-none">
-          🔌
-        </span>
       </div>
 
       {/* Texte */}
