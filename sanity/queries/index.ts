@@ -1,4 +1,5 @@
 import { sanityFetch } from "../lib/live";
+import { dynamicClient } from "../lib/client";
 import {
   BLOG_CATEGORIES,
   BRAND_BY_SLUG_QUERY,
@@ -99,11 +100,10 @@ const getBrand = async (slug: string) => {
 };
 const getMyOrders = async (userId: string) => {
   try {
-    const orders = await sanityFetch({
-      query: MY_ORDERS_QUERY,
-      params: { userId },
-    });
-    return orders?.data || null;
+    // Client sans cache : l'historique des commandes doit toujours être à
+    // jour juste après qu'un client passe commande.
+    const orders = await dynamicClient.fetch(MY_ORDERS_QUERY, { userId });
+    return orders || null;
   } catch (error) {
     console.error("Error fetching product by ID:", error);
     return null;

@@ -5,6 +5,7 @@ import { getMessages, getLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import Script from "next/script";
+import { SanityLive } from "@/sanity/lib/live";
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
 
@@ -91,6 +92,7 @@ const RootLayout = async ({
         )}
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          <SanityLive />
           <Toaster
             position="bottom-right"
             toastOptions={{

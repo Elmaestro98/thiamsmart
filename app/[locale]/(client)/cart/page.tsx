@@ -290,23 +290,27 @@ const CartPage = () => {
   };
 
   /**
-   * Ouvre WhatsApp dans un nouvel onglet.
+   * Ouvre WhatsApp dans la fenêtre déjà ouverte en amont (voir handleCommander).
+   * On ne peut pas appeler window.open() ici : après un `await fetch(...)`,
+   * ce n'est plus considéré comme un geste utilisateur direct, donc les
+   * navigateurs (surtout mobiles) bloquent silencieusement le popup.
    * Retourne false si le numéro n'est pas configuré.
    */
-  const sendWhatsApp = (): boolean => {
+  const sendWhatsApp = (whatsappWindow: Window | null): boolean => {
     if (!WHATSAPP_NUMBER) {
-      toast.error("Numéro WhatsApp non configuré.");
       toast.error("Le numéro WhatsApp n'est pas configuré sur le serveur.");
       return false;
     }
 
-    // On s'assure que WHATSAPP_NUMBER ne contient que des chiffres
+    // On s'assure que le numéro ne contient que des chiffres (format wa.me)
     const cleanedNumber = WHATSAPP_NUMBER.replace(/\D/g, "");
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage()}`,
-      `https://wa.me/${cleanedNumber}?text=${buildWhatsAppMessage()}`,
-      "_blank",
-    );
+    const url = `https://wa.me/${cleanedNumber}?text=${buildWhatsAppMessage()}`;
+
+    if (whatsappWindow) {
+      whatsappWindow.location.href = url;
+    } else {
+      window.open(url, "_blank");
+    }
     return true;
   };
 
@@ -321,6 +325,10 @@ const CartPage = () => {
   // ─── Commander via WhatsApp ──────────────────────────────────────────────
   const handleCommander = async () => {
     if (!validateOrder()) return;
+
+    // Ouverte tout de suite, de façon synchrone, dans le geste de clic —
+    // sinon les navigateurs bloquent l'ouverture après l'await ci-dessous.
+    const whatsappWindow = window.open("", "_blank");
 
     setLoading((prev) => ({ ...prev, whatsapp: true }));
     try {
@@ -338,18 +346,23 @@ const CartPage = () => {
       const data = await res.json();
 
       if (!res.ok) {
+        whatsappWindow?.close();
         toast.error(
           data.error || "Erreur lors de la création de la commande.",
         );
         return;
       }
 
-      if (!sendWhatsApp()) return;
+      if (!sendWhatsApp(whatsappWindow)) {
+        whatsappWindow?.close();
+        return;
+      }
 
       // FIX : on vide le panier uniquement après confirmation de l'envoi WhatsApp
       resetCart();
       window.location.href = `/success?orderId=${data.orderId}`;
     } catch {
+      whatsappWindow?.close();
       toast.error("Une erreur est survenue. Réessayez.");
     } finally {
       setLoading((prev) => ({ ...prev, whatsapp: false }));
