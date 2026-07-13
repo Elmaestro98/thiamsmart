@@ -11,11 +11,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import toast from "react-hot-toast";
+import { Address } from "@/sanity.types";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (address: Address) => void;
 }
 
 // FIX : "default" est un mot réservé JavaScript ; on utilise "isDefault" comme clé d'état.
@@ -59,14 +60,15 @@ const AddAddressModal = ({ open, onClose, onSuccess }: Props) => {
         body: JSON.stringify({ ...form, default: form.isDefault }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const err = await res.json();
-        toast.error(err.error || "Erreur lors de l'ajout");
+        toast.error(data.error || "Erreur lors de l'ajout");
         return;
       }
 
       toast.success("Adresse ajoutée avec succès !");
-      onSuccess();
+      onSuccess(data.address);
       onClose();
       setForm(INITIAL_FORM);
     } catch {

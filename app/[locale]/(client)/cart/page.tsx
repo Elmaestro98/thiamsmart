@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Address } from "@/sanity.types";
-import { client } from "@/sanity/lib/client";
+import { dynamicClient } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import useStore from "@/store";
 import { useAuth } from "@clerk/nextjs";
@@ -213,7 +213,7 @@ const CartPage = () => {
     setLoading((prev) => ({ ...prev, addresses: true }));
     try {
       const query = `*[_type=="address" && clerkUserId == $userId] | order(publishedAt desc)`;
-      const data: Address[] = await client.fetch(query, { userId });
+      const data: Address[] = await dynamicClient.fetch(query, { userId });
       setAddresses(data);
 
       const defaultAddr = data.find((a) => a.default) ?? data[0] ?? null;
@@ -228,6 +228,18 @@ const CartPage = () => {
   useEffect(() => {
     fetchAddresses();
   }, [fetchAddresses]);
+
+  // Ajoute la nouvelle adresse directement à l'écran dès sa création,
+  // sans re-télécharger la liste (évite l'attente due au cache CDN).
+  const handleAddressAdded = useCallback((newAddress: Address) => {
+    setAddresses((prev) => {
+      const others = newAddress.default
+        ? (prev ?? []).map((a) => ({ ...a, default: false }))
+        : (prev ?? []);
+      return [newAddress, ...others];
+    });
+    setSelectedAddress((prev) => (newAddress.default || !prev ? newAddress : prev));
+  }, []);
 
   // ─── Helpers ─────────────────────────────────────────────────────────────
   const buildItems = () =>
@@ -637,7 +649,7 @@ const CartPage = () => {
       <AddAddressModal
         open={showAddressModal}
         onClose={() => setShowAddressModal(false)}
-        onSuccess={fetchAddresses}
+        onSuccess={handleAddressAdded}
       />
     </div>
   );
