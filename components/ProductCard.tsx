@@ -1,6 +1,6 @@
 "use client";
 
-import { urlFor } from "@/sanity/lib/image";
+import { safeImageUrl } from "@/sanity/lib/image";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import ProductSideMenu from "./ProductSideMenu";
@@ -28,12 +28,15 @@ const ProductCard = ({ product }: Props) => {
   const isPromotion = product?.status === "promotion";
   const reviewCount = product?.reviewCount ?? 0;
   const avgRating = product?.avgRating ?? 0;
+  const imageUrl = safeImageUrl(
+    product?.images?.find((img) => img?.asset?._ref),
+  );
 
   return (
     <div className="relative text-sm border border-gray-200 rounded-xl group bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
       {/* Image Container */}
       <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0">
-        {product?.images && (
+        {imageUrl && (
           <Link
             href={`/product/${product?.slug?.current}`}
             className="block relative"
@@ -41,7 +44,7 @@ const ProductCard = ({ product }: Props) => {
             {/* ✅ Hauteur réduite sur mobile, normale sur desktop */}
             <div className="relative h-48 xs:h-56 sm:h-64 md:h-72 w-full">
               <Image
-                src={urlFor(product.images[0]).url()}
+                src={imageUrl}
                 alt={product?.name || "Product"}
                 fill
                 sizes="(max-width: 480px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"

@@ -32,7 +32,7 @@ const BoutiqueProducts = ({ slug, storeName, categories = [] }: Props) => {
         const query = `
           *[_type == 'product' && references(*[_type == "store" && slug.current == $storeSlug]._id) ${categoryFilter}] | order(name asc){
           ...,
-          "categories": categories[]->title,
+          "categories": categories[]->titre,
           "avgRating": math::avg(*[_type == "review" && references(^._id)].rating),
           "reviewCount": count(*[_type == "review" && references(^._id)])
           }
