@@ -72,12 +72,15 @@ const useStore = create<StoreState>()(
           0,
         );
       },
+      // Total AVANT remise : on additionne les prix barrés.
+      // Dans Sanity, "discount" = prix barré en FCFA (ancien prix), pas un pourcentage.
+      // Si le produit n'a pas de prix barré (ou s'il est plus bas que le prix), on prend le prix normal.
       getSubTotalPrice: () => {
         return get().items.reduce((total, item) => {
           const price = item.product.price ?? 0;
-          const discount = ((item.product.discount ?? 0) * price) / 100;
-          const discountedPrice = price + discount;
-          return total + discountedPrice * item.quantity;
+          const oldPrice = item.product.discount ?? 0;
+          const priceBeforeDiscount = oldPrice > price ? oldPrice : price;
+          return total + priceBeforeDiscount * item.quantity;
         }, 0);
       },
       getItemCount: (productId) => {

@@ -28,26 +28,34 @@ const ProductCard = ({ product }: Props) => {
   const isPromotion = product?.status === "promotion";
   const reviewCount = product?.reviewCount ?? 0;
   const avgRating = product?.avgRating ?? 0;
+  // Première image qui contient vraiment un fichier (asset) dans Sanity
+  const firstImage = product?.images?.find((img) => img?.asset);
 
   return (
     <div className="relative text-sm border border-gray-200 rounded-xl group bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
       {/* Image Container */}
       <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0">
-        {product?.images && (
-          <Link
+        <Link
             href={`/product/${product?.slug?.current}`}
             className="block relative"
           >
             {/* ✅ Hauteur réduite sur mobile, normale sur desktop */}
             <div className="relative h-48 xs:h-56 sm:h-64 md:h-72 w-full">
-              <Image
-                src={urlFor(product.images[0]).url()}
-                alt={product?.name || "Product"}
-                fill
-                sizes="(max-width: 480px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className={`object-contain p-3 sm:p-4 transition-all duration-500 
-                  ${!isOutOfStock ? "group-hover:scale-110" : "opacity-40 grayscale"}`}
-              />
+              {firstImage ? (
+                <Image
+                  src={urlFor(firstImage).url()}
+                  alt={product?.name || "Product"}
+                  fill
+                  sizes="(max-width: 480px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  className={`object-contain p-3 sm:p-4 transition-all duration-500
+                    ${!isOutOfStock ? "group-hover:scale-110" : "opacity-40 grayscale"}`}
+                />
+              ) : (
+                // Pas d'image valide : on affiche une icône à la place
+                <div className="flex h-full w-full items-center justify-center text-gray-300">
+                  <Package size={48} />
+                </div>
+              )}
             </div>
 
             {/* Hover Overlay */}
@@ -55,7 +63,6 @@ const ProductCard = ({ product }: Props) => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             )}
           </Link>
-        )}
 
         {/* Product Side Menu */}
         {/* ✅ Toujours visible sur mobile (pas besoin de hover) */}
