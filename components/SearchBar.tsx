@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import PriceFormatter from "./PriceFormatter";
 
@@ -258,9 +258,9 @@ function SearchBar() {
                           >
                             {/* Image */}
                             <div className="w-12 h-12 relative flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
-                              {product.images?.[0] && (
+                              {getFirstImage(product.images) && (
                                 <Image
-                                  src={urlFor(product.images[0])
+                                  src={urlFor(getFirstImage(product.images)!)
                                     .width(96)
                                     .url()}
                                   alt={product.name ?? "Produit"}

@@ -4,8 +4,9 @@ import {
   SanityImageCrop,
   SanityImageHotspot,
 } from "@/sanity.types";
-import { urlFor } from "@/sanity/lib/image";
+import { getValidImages, urlFor } from "@/sanity/lib/image";
 import { AnimatePresence, motion } from "framer-motion";
+import { Package } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 
@@ -25,7 +26,9 @@ interface Props {
   isStock?: number | undefined;
 }
 
-const ImageView = ({ images = [], isStock }: Props) => {
+const ImageView = ({ images: rawImages = [], isStock }: Props) => {
+  // On ignore les cases image vides (sans photo) venant de Sanity
+  const images = getValidImages(rawImages);
   const [active, setActive] = useState(images[0]);
 
   return (
@@ -39,6 +42,11 @@ const ImageView = ({ images = [], isStock }: Props) => {
           transition={{ duration: 0.5 }}
           className="w-full max-h-[550px] min-h-[280px] sm:min-h-[450px] border border-darkColor/10 rounded-md group overflow-hidden"
         >
+          {!active && (
+            <div className="flex w-full min-h-[280px] sm:min-h-[450px] items-center justify-center text-gray-300">
+              <Package size={64} />
+            </div>
+          )}
           {active && (
             <Image
               src={urlFor(active).url()}
@@ -53,8 +61,9 @@ const ImageView = ({ images = [], isStock }: Props) => {
           )}
         </motion.div>
       </AnimatePresence>
+      {images.length > 1 && (
       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 h-20 md:h-24">
-        {images?.map((image) => (
+        {images.map((image) => (
           <button
             key={image?._key}
             onClick={() => setActive(image)}
@@ -70,6 +79,7 @@ const ImageView = ({ images = [], isStock }: Props) => {
           </button>
         ))}
       </div>
+      )}
     </div>
   );
 };

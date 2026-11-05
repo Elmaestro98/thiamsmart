@@ -14,7 +14,7 @@ import {
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import PriceFormatter from "./PriceFormatter";
 import {
   Download,
@@ -189,10 +189,12 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {product?.product?.images?.[0] && (
+                          {getFirstImage(product?.product?.images) && (
                             <div className="relative w-11 h-11 rounded-lg overflow-hidden border border-gray-100 shrink-0">
                               <Image
-                                src={urlFor(product.product.images[0]).url()}
+                                src={urlFor(
+                                  getFirstImage(product?.product?.images)!,
+                                ).url()}
                                 alt={product?.product?.name ?? "Product"}
                                 fill
                                 className="object-cover"

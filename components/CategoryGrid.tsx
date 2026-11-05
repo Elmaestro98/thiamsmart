@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import ProductsGrid from "./ProductsGrid";
-import { urlFor } from "@/sanity/lib/image";
+import { hasImage, urlFor } from "@/sanity/lib/image";
 
 interface Category {
   _id: string;
@@ -93,7 +93,7 @@ export default function CategoryGrid() {
                 >
                   {/* Image de la catégorie */}
                   <div className="relative h-48 w-full overflow-hidden bg-gray-200">
-                    {category.image ? (
+                    {hasImage(category.image) ? (
                       <Image
                         src={urlFor(category.image).url()}
                         alt={category.titre}

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { client } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import { Product } from "@/sanity.types";
 import Container from "@/components/Container";
 import AddToCartButton from "@/components/AddToCartButton";
@@ -46,8 +46,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!product) return { title: "Produit non trouvé" };
 
-  const imageUrl = product.images?.[0]
-    ? urlFor(product.images[0]).width(1200).height(630).url()
+  const firstImage = getFirstImage(product.images);
+  const imageUrl = firstImage
+    ? urlFor(firstImage).width(1200).height(630).url()
     : undefined;
 
   const productUrl = `${BASE_URL}/product/${product.slug?.current}`;
@@ -85,7 +86,9 @@ const ProductPage = async ({ params }: Props) => {
     name: product.name,
     description: product.description ?? "",
     sku: product._id,
-    image: product.images?.[0] ? urlFor(product.images[0]).url() : "",
+    image: getFirstImage(product.images)
+      ? urlFor(getFirstImage(product.images)!).url()
+      : "",
     offers: {
       "@type": "Offer",
       url: `${BASE_URL}/product/${product.slug?.current}`,

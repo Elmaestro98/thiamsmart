@@ -22,7 +22,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Address } from "@/sanity.types";
 import { dynamicClient } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import useStore from "@/store";
 import { useAuth } from "@clerk/nextjs";
 import { Check, Lock, MessageCircle, ShoppingBag, Trash2 } from "lucide-react";
@@ -443,13 +443,13 @@ const CartPage = () => {
                         className="flex items-center gap-4 p-4 md:p-5 border-b last:border-b-0 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/40"
                       >
                         {/* Image */}
-                        {product?.images && (
+                        {getFirstImage(product?.images) && (
                           <Link
                             href={`/product/${product?.slug?.current}`}
                             className="shrink-0 rounded-xl overflow-hidden border bg-white dark:bg-gray-800 p-1.5 shadow-sm group"
                           >
                             <Image
-                              src={urlFor(product.images[0]).url()}
+                              src={urlFor(getFirstImage(product.images)!).url()}
                               alt={product.name ?? "Produit"}
                               width={112}
                               height={112}

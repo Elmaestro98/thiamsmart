@@ -2,7 +2,7 @@ import BrandProducts from "@/components/BrandProducts";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import { getBrandBySlug, getCategories } from "@/sanity/queries";
-import { urlFor } from "@/sanity/lib/image";
+import { hasImage, urlFor } from "@/sanity/lib/image";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: brand.title ?? "",
       description,
       url: brandUrl,
-      ...(brand.image && { images: [{ url: urlFor(brand.image).url() }] }),
+      ...(hasImage(brand.image) && { images: [{ url: urlFor(brand.image).url() }] }),
     },
   };
 }
@@ -89,7 +89,7 @@ const BrandPage = async ({ params }: Props) => {
         </nav>
 
         <header className="mb-10 flex items-center gap-6">
-          {brand.image && (
+          {hasImage(brand.image) && (
             <div className="w-16 h-16 rounded-xl border border-gray-100 bg-white flex items-center justify-center overflow-hidden shrink-0">
               <Image
                 src={urlFor(brand.image).url()}

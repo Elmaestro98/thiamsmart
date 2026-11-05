@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { client } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import { useAuth } from "@clerk/nextjs";
 import {
   CheckCircle2,
@@ -200,9 +200,9 @@ const OrderTrackingPage = () => {
                   {order.products?.map((item: any, idx: number) => (
                     <div key={idx} className="flex items-center gap-4 p-4">
                       <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-100 border shrink-0">
-                        {item.product?.images && (
+                        {getFirstImage(item.product?.images) && (
                           <Image
-                            src={urlFor(item.product.images[0]).url()}
+                            src={urlFor(getFirstImage(item.product?.images)!).url()}
                             alt={item.product.name}
                             fill
                             className="object-cover"

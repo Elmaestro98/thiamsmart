@@ -8,7 +8,7 @@ import { Heart } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import { Product } from "@/sanity.types";
 import PriceFormatter from "./PriceFormatter";
 import AddToCartButton from "./AddToCartButton";
@@ -66,13 +66,13 @@ const WishListProducts = () => {
                           size={18}
                           className="hover:text-red-600 hover:cursor-pointer hoverEffect"
                         />
-                        {product?.images && (
+                        {getFirstImage(product?.images) && (
                           <Link
                             href={`/product/${product?.slug?.current}`}
                             className="border rounded-md group hidden md:inline-flex"
                           >
                             <Image
-                              src={urlFor(product?.images[0]).url()}
+                              src={urlFor(getFirstImage(product?.images)!).url()}
                               alt={"product image"}
                               width={80}
                               height={80}

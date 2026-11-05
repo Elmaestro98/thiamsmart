@@ -3,7 +3,7 @@ import Title from "./Title";
 import Link from "next/link";
 import { getAllBrands } from "@/sanity/queries";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { hasImage, urlFor } from "@/sanity/lib/image";
 import { Brand } from "@/sanity.types";
 import { DoorOpen, Headset, ShieldCheck, Truck } from "lucide-react";
 
@@ -71,7 +71,7 @@ const ShopByBrands = async () => {
               }}
               className="group relative bg-gray-50 rounded-xl border border-gray-100 aspect-square flex items-center justify-center overflow-hidden hover:border-shop_orange/30 hover:bg-white hover:shadow-md hover:shadow-shop_orange/5 transition-all duration-300"
             >
-              {brand?.image && (
+              {brand && hasImage(brand.image) && (
                 <Image
                   src={urlFor(brand.image).url()}
                   alt={brand?.title ?? "brand"}

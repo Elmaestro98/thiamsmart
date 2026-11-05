@@ -2,7 +2,7 @@ import Title from "./Title";
 import { Category } from "@/sanity.types";
 import { ArrowRight, Grid3X3 } from "lucide-react";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { hasImage, urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 
 type CategoryWithCount = Category & { productCount?: number };
@@ -52,7 +52,7 @@ const HomeCategories = ({
 
             <div className="p-5 flex items-center gap-4">
               {/* Image container */}
-              {category?.image ? (
+              {hasImage(category?.image) ? (
                 <div className="relative shrink-0 w-16 h-16 rounded-lg bg-gray-50 border border-gray-100 group-hover:border-shop_orange/30 overflow-hidden transition-colors duration-300">
                   <Image
                     src={urlFor(category.image).url()}

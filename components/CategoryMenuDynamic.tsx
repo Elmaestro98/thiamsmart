@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { hasImage, urlFor } from "@/sanity/lib/image";
 import {
   Menu,
   MenuButton,
@@ -126,7 +126,7 @@ export default function CategoryMenu({
                     >
                       {/* Image de la catégorie */}
                       <div className="relative h-12 w-12 rounded-md overflow-hidden flex-shrink-0 bg-gray-200">
-                        {cat.image ? (
+                        {hasImage(cat.image) ? (
                           <Image
                             src={urlFor(cat.image).width(48).height(48).url()}
                             alt={cat.titre}

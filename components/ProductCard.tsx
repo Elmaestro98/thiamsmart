@@ -1,6 +1,6 @@
 "use client";
 
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, urlFor } from "@/sanity/lib/image";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import ProductSideMenu from "./ProductSideMenu";
@@ -29,7 +29,7 @@ const ProductCard = ({ product }: Props) => {
   const reviewCount = product?.reviewCount ?? 0;
   const avgRating = product?.avgRating ?? 0;
   // Première image qui contient vraiment un fichier (asset) dans Sanity
-  const firstImage = product?.images?.find((img) => img?.asset);
+  const firstImage = getFirstImage(product?.images);
 
   return (
     <div className="relative text-sm border border-gray-200 rounded-xl group bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">

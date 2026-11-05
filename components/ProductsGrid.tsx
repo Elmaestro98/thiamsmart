@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { urlFor } from "@/sanity/lib/image";
+import { getFirstImage, getValidImages, urlFor } from "@/sanity/lib/image";
 import { ChevronLeft, ShoppingCart, Heart } from "lucide-react";
 
 interface Product {
@@ -84,9 +84,9 @@ export default function ProductsGrid({
             >
               {/* Container image avec badges */}
               <div className="relative h-56 w-full overflow-hidden bg-gray-200">
-                {product.images && product.images.length > 0 ? (
+                {getFirstImage(product.images) ? (
                   <Image
-                    src={urlFor(product.images[0]).url()}
+                    src={urlFor(getFirstImage(product.images)).url()}
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -133,9 +133,9 @@ export default function ProductsGrid({
                 </div>
 
                 {/* Nombre de photos */}
-                {product.images && product.images.length > 1 && (
+                {getValidImages(product.images).length > 1 && (
                   <div className="absolute bottom-3 left-3 bg-black/60 text-white px-2 py-1 rounded text-xs">
-                    {product.images.length} photos
+                    {getValidImages(product.images).length} photos
                   </div>
                 )}
               </div>
@@ -209,6 +209,10 @@ function ProductModal({
   onImageChange,
   onClose,
 }: ProductModalProps) {
+  // Seulement les images qui contiennent vraiment une photo
+  const images = getValidImages(product.images);
+  const currentImage = images[currentImageIndex] ?? images[0];
+
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -222,9 +226,9 @@ function ProductModal({
           {/* Carousel d'images */}
           <div>
             <div className="relative h-96 w-full bg-gray-200 rounded-lg overflow-hidden mb-4">
-              {product.images && product.images.length > 0 ? (
+              {currentImage ? (
                 <Image
-                  src={urlFor(product.images[currentImageIndex]).url()}
+                  src={urlFor(currentImage).url()}
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -237,9 +241,9 @@ function ProductModal({
             </div>
 
             {/* Miniatures */}
-            {product.images && product.images.length > 1 && (
+            {images.length > 1 && (
               <div className="flex gap-2 overflow-x-auto">
-                {product.images.map((image, index) => (
+                {images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => onImageChange(index)}
